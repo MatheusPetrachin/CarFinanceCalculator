@@ -1,0 +1,145 @@
+<div class="row">
+    <div class="cards-wrapper">
+        <!-- Card 1: FIPE -->
+        <div class="custom-card">
+            <div class="card-title">
+                <span class="material-icons" style="font-size:2.2rem;color:#3973e7;">directions_car</span>
+                Consulta FIPE
+            </div>
+            <div class="card-subtitle">
+                Consulte o valor do veículo pela tabela FIPE
+            </div>
+            <div>
+                <mat-form-field class="col-12">
+                    <mat-label>Veículo</mat-label>
+                    <span matPrefix class="material-icons"
+                        style="color:#3973e7; margin-right:8px;">directions_car</span>
+                    <mat-select (selectionChange)='getMarcas($event.value)'>
+                        <mat-option value="carros">Carros</mat-option>
+                        <mat-option value="motos">Motos</mat-option>
+                    </mat-select>
+                </mat-form-field>
+            </div>
+            <div>
+                <mat-form-field class="col-12">
+                    <mat-label>Marcas</mat-label>
+                    <span matPrefix class="material-icons" style="color:#3973e7; margin-right:8px;">local_offer</span>
+                    <mat-select (selectionChange)='getModelos($event.value)'>
+                        <mat-option *ngFor="let marca of marcas" [value]="marca.codigo">
+                            {{marca.nome}}
+                        </mat-option>
+                    </mat-select>
+                </mat-form-field>
+            </div>
+            <div>
+                <mat-form-field class="col-12">
+                    <mat-label>Modelos</mat-label>
+                    <span matPrefix class="material-icons" style="color:#3973e7; margin-right:8px;">commute</span>
+                    <mat-select (selectionChange)='getAnos($event.value)'>
+                        <mat-option *ngFor="let modelo of modelos" [value]="modelo.codigo">
+                            {{modelo.nome}}
+                        </mat-option>
+                    </mat-select>
+                </mat-form-field>
+            </div>
+            <div>
+                <mat-form-field class="col-12">
+                    <mat-label>Anos</mat-label>
+                    <span matPrefix class="material-icons"
+                        style="color:#3973e7; margin-right:8px;">calendar_today</span>
+                    <mat-select (selectionChange)='getResultado($event.value)'>
+                        <mat-option *ngFor="let ano of anos" [value]="ano.codigo">
+                            {{ano.nome}}
+                        </mat-option>
+                    </mat-select>
+                </mat-form-field>
+            </div>
+            <div *ngIf="resultadoFipe">
+                <div>
+                    <strong>Valor:</strong> {{resultadoFipe.Valor}}
+                </div>
+                <div>
+                    <strong>Mês Referência FIPE:</strong> {{resultadoFipe.MesReferencia}}
+                </div>
+            </div>
+        </div>
+
+        <!-- Card 2: Calculadora de Financiamento -->
+        <div class="custom-card">
+            <div class="card-title">
+                <span class="material-icons" style="font-size:2.2rem;color:#3973e7;">calculate</span>
+                Calculadora de Financiamento
+            </div>
+            <div class="card-subtitle">
+                Calcule o valor das parcelas, juros pagos e total ao final do financiamento.
+            </div>
+            <div>
+                <mat-form-field class="col-12">
+                    <mat-label>Valor do Veículo</mat-label>
+                    <span matPrefix class="material-icons" style="color:#3973e7; margin-right:8px;">attach_money</span>
+                    <input currencyMask matInput #valorTotal [value]="valorFIPE" placeholder="R$ 0,00">
+                </mat-form-field>
+            </div>
+            <div>
+                <mat-form-field class="col-12">
+                    <mat-label>Entrada (opcional)</mat-label>
+                    <span matPrefix class="material-icons" style="color:#3973e7; margin-right:8px;">attach_money</span>
+                    <input currencyMask matInput #entrada placeholder="R$ 0,00">
+                </mat-form-field>
+            </div>
+            <div>
+                <mat-form-field class="col-12">
+                    <mat-label>Parcela Residual (opcional)</mat-label>
+                    <span matPrefix class="material-icons" style="color:#3973e7; margin-right:8px;">attach_money</span>
+                    <input currencyMask matInput #parcelaResidual placeholder="R$ 0,00">
+                </mat-form-field>
+            </div>
+            <div>
+                <mat-form-field class="col-12">
+                    <mat-label>Nº Parcelas</mat-label>
+                    <span matPrefix class="material-icons"
+                        style="color:#3973e7; margin-right:8px;">calendar_today</span>
+                    <input matInput #numParcelas type="number" maxlength="2" min="1" max="100" placeholder="Ex. 36"
+                        step="1" value="36">
+                </mat-form-field>
+            </div>
+            <div>
+                <mat-form-field class="col-12">
+                    <mat-label>Banco/Instituição Financeira</mat-label>
+                    <span matPrefix class="material-icons"
+                        style="color:#3973e7; margin-right:8px;">account_balance</span>
+                    <mat-select (selectionChange)='selecionarTaxaJuros($event.value)' placeholder="Selecione um banco">
+                        <mat-option *ngFor="let taxa of taxasJuros" [value]="taxa">
+                            {{taxa.InstituicaoFinanceira}} - {{taxa.TaxaJurosAoMes}}% ao mês ({{taxa.TaxaJurosAoAno}}%
+                            ao ano)
+                        </mat-option>
+                    </mat-select>
+                </mat-form-field>
+                <div *ngIf="carregandoTaxas" class="text-center">
+                    <small>Carregando taxas de juros...</small>
+                </div>
+                <div *ngIf="taxasJuros.length > 0 && !carregandoTaxas" class="text-center">
+                    <small>Taxas atualizadas em: {{dataTaxasJuros || 'Data mais recente disponível'}} </small>
+                </div>
+            </div>
+            <div>
+                <mat-form-field class="col-12">
+                    <mat-label>Taxa de Juros/Financiamento</mat-label>
+                    <span matPrefix class="material-icons" style="color:#3973e7; margin-right:8px;">show_chart</span>
+                    <input matInput #taxaJuros type="number" placeholder="0.7" min="0" (change)="clearParcelaIdeal()">
+                </mat-form-field>
+            </div>
+            <div class="text-center">
+                <button mat-raised-button class="button-primary" (click)="calcular()">Calcular financiamento</button>
+
+            </div>
+            <div class="mt-3">
+                <mat-form-field class="col-12">
+                    <mat-label>Parcela Ideal</mat-label>
+                    <span matPrefix class="material-icons" style="color:#3973e7; margin-right:8px;">payments</span>
+                    <input matInput #parcelaTotal placeholder="R$ 0,00">
+                </mat-form-field>
+            </div>
+        </div>
+    </div>
+</div>

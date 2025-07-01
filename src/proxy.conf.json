@@ -1,0 +1,18 @@
+{
+  "/bcb-api": {
+    "target": "https://www.bcb.gov.br",
+    "secure": true,
+    "changeOrigin": true,
+    "pathRewrite": {
+      "^/bcb-api": ""
+    }
+  },
+  "/olinda-api": {
+    "target": "https://olinda.bcb.gov.br",
+    "secure": true,
+    "changeOrigin": true,
+    "pathRewrite": {
+      "^/olinda-api": ""
+    }
+  }
+}
