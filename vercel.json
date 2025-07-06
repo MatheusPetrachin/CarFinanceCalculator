@@ -1,0 +1,12 @@
+{
+    "rewrites": [
+        {
+            "source": "/bcb-api/:match*",
+            "destination": "https://www.bcb.gov.br/:match*"
+        },
+        {
+            "source": "/olinda-api/:match*",
+            "destination": "https://olinda.bcb.gov.br/:match*"
+        }
+    ]
+}
