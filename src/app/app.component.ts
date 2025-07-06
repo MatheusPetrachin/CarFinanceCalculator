@@ -70,7 +70,7 @@ export class AppComponent implements OnInit {
   getModelos(value: string) {
     this.codigoMarca = value;
     if (this.codigoVeiculo && this.codigoMarca) {
-      this.appService.getModelos(this.codigoVeiculo, this.codigoMarca).subscribe(data => { 
+      this.appService.getModelos(this.codigoVeiculo, this.codigoMarca).subscribe(data => {
         this.modelos = data.modelos || [];
       });
     }
@@ -79,7 +79,7 @@ export class AppComponent implements OnInit {
   getAnos(value: string) {
     this.codigoModelo = value;
     if (this.codigoVeiculo && this.codigoMarca && this.codigoModelo) {
-      this.appService.getAnos(this.codigoVeiculo, this.codigoMarca, this.codigoModelo).subscribe(data => { 
+      this.appService.getAnos(this.codigoVeiculo, this.codigoMarca, this.codigoModelo).subscribe(data => {
         this.anos = data;
       });
     }
@@ -144,31 +144,38 @@ export class AppComponent implements OnInit {
     var parcelaTotal = parseFloat(this.parcelaTotal.nativeElement.value.replace("R$ ", "").replace(".", "").replace(",", "."));
 
     if (parcelaTotal) {
-      taxaJuros = 0;
-      do {
-        var calc = 0;
-        if (taxaJuros == 0) {
-          calc = parseFloat((valorFinanciado / numParcelas).toFixed(2));
-        }
-        else {
-          calc = parseFloat(((valorFinanciado * taxaJuros) / (1 - (1 + taxaJuros) ** (- numParcelas))).toFixed(2));
-        }
-
-        if (calc > parcelaTotal) {
-          var valorMinimo = (valorFinanciado / numParcelas).toFixed(2);
-          alert("Parcela inválida... A parcela para resultar em taxa zero é R$" + valorMinimo.replace(".", ","));
-          break;
-        }
-
-        taxaJuros += 0.000001;
-      } while (parcelaTotal != calc);
-
-      taxaJuros = taxaJuros * 100;
-      this.taxaJuros.nativeElement.value = taxaJuros.toFixed(2);
+      this.taxaJuros.nativeElement.value = this.calcularTaxaJuros(valorFinanciado, numParcelas, parcelaTotal);
     }
     else if (taxaJuros) {
       this.parcelaTotal.nativeElement.value = "R$ " + ((valorFinanciado * taxaJuros) / (1 - (1 + taxaJuros) ** (- numParcelas))).toFixed(2).replace(".", ",");
     }
+  }
+
+  calcularTaxaJuros(valorFinanciado: number, numParcelas: number, valorDaParcela: number) {
+    const maxIter = 100;
+    const tol = 1e-10;
+    let i = 0.01; // chute inicial 1% ao mês
+
+    for (let iter = 0; iter < maxIter; iter++) {
+      let pow = Math.pow(1 + i, -numParcelas);
+      let numerador = valorFinanciado * i;
+      let denominador = 1 - pow;
+      let f = numerador / denominador - valorDaParcela;
+
+      if (Math.abs(f) < tol) {
+        return i * 100; // taxa em %
+      }
+
+      // derivada
+      let df = (valorFinanciado * denominador - valorFinanciado * i * numParcelas * pow) / (denominador * denominador);
+
+      i = i - f / df;
+
+      if (i < 0) {
+        i = tol; // evitar negativo
+      }
+    }
+    return i * 100; // taxa em %
   }
 
   clearParcelaIdeal() {
