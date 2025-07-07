@@ -3,7 +3,7 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder } from '@angular/forms';
 import { Marca, Modelo, ModeloAno, ResultadoFipe, TaxaJuros, ResultadoTaxaJuros } from './app.model';
 import { AppService } from './app.services';
-import { CommonModule } from '@angular/common';
+import { CommonModule, CurrencyPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatSelectModule } from '@angular/material/select';
 import { MatInputModule } from '@angular/material/input';
@@ -18,6 +18,7 @@ import { HttpClientModule } from '@angular/common/http';
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css'],
   standalone: true,
+  providers: [CurrencyPipe],
   imports: [
     CommonModule,
     FormsModule,
@@ -56,7 +57,15 @@ export class AppComponent implements OnInit {
   parcelaTotalResult: string = '';
   valorFIPE: string = '';
 
-  constructor(private appService: AppService) { }
+  constructor(private appService: AppService, private currencyPipe: CurrencyPipe) { }
+
+  onInput(event: any) {
+    event.target.value = this.currencyFormatter(event.target.value);
+  }
+
+  currencyFormatter(value: any) {
+    return this.currencyPipe.transform((parseFloat(value.replace(/\D/g, '')) / 100).toFixed(2), 'BRL', 'symbol', '1.2-2');
+  }
 
   ngOnInit(): void {
     this.getTaxasJuros();
@@ -134,20 +143,29 @@ export class AppComponent implements OnInit {
 
   calcular() {
 
-    var valorTotal = this.valorTotal.nativeElement.value.replace("R$ ", "").replace(".", "").replace(",", ".");
-    var entrada = this.entrada.nativeElement.value.replace("R$ ", "").replace(".", "").replace(",", ".");
-    var parcelaResidual = this.parcelaResidual.nativeElement.value.replace("R$ ", "").replace(".", "").replace(",", ".");
+    var valorTotal = this.valorTotal.nativeElement.value.replace(/R\$\s?/g, "").replace(/\./g, "").replace(",", ".");
+    var entrada = this.entrada.nativeElement.value.replace(/R\$\s?/g, "").replace(/\./g, "").replace(",", ".");
+    var parcelaResidual = this.parcelaResidual.nativeElement.value.replace(/R\$\s?/g, "").replace(/\./g, "").replace(",", ".");
 
     var numParcelas = parseFloat(this.numParcelas.nativeElement.value);
     var taxaJuros = this.taxaJuros.nativeElement.value / 100;
     var valorFinanciado = valorTotal - entrada - parcelaResidual;
-    var parcelaTotal = parseFloat(this.parcelaTotal.nativeElement.value.replace("R$ ", "").replace(".", "").replace(",", "."));
+    var parcelaTotal = parseFloat(this.parcelaTotal.nativeElement.value.replace(/R\$\s?/g, "").replace(/\./g, "").replace(",", "."));
 
     if (parcelaTotal) {
       this.taxaJuros.nativeElement.value = this.calcularTaxaJuros(valorFinanciado, numParcelas, parcelaTotal);
     }
     else if (taxaJuros) {
-      this.parcelaTotal.nativeElement.value = "R$ " + ((valorFinanciado * taxaJuros) / (1 - (1 + taxaJuros) ** (- numParcelas))).toFixed(2).replace(".", ",");
+      const value = (valorFinanciado * taxaJuros) / (1 - Math.pow(1 + taxaJuros, -numParcelas));
+
+      // Garantir que value seja numérico e corretamente formatado
+      this.parcelaTotal.nativeElement.value = this.currencyPipe.transform(
+        value,
+        'BRL',
+        'symbol',
+        '1.2-2'
+      );
+
     }
   }
 
