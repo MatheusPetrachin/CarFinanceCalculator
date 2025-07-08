@@ -1,3 +1,27 @@
+/* Garantir que o layout nunca ultrapasse a largura da tela */
+html, body {
+  max-width: 100vw;
+  overflow-x: hidden;
+}
+
+.row, .cards-wrapper, .custom-card, .historico-container {
+  max-width: 100vw !important;
+  overflow-x: auto;
+  box-sizing: border-box;
+}
+
+.historico-table {
+  min-width: 600px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+@media (max-width: 768px) {
+  .historico-table {
+    min-width: 400px;
+  }
+}
+
 /* Estilos para centralizar o modal de histórico */
 .historico-container {
     position: fixed;
@@ -168,4 +192,144 @@
     .carro-detalhes {
         font-size: 11px;
     }
+}
+
+/* Melhorias para responsividade e layout */
+.cards-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  margin: 0 auto;
+  padding: 0 15px;
+  max-width: 900px;
+}
+
+.custom-card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  margin-bottom: 20px;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+  cursor: pointer;
+}
+.card-header:hover  {
+  color: #3973e7;
+  background: rgba(57, 115, 231, 0.08);  
+}
+
+.collapse-btn {
+  color: #3973e7;
+  transition: transform 0.3s ease;
+  cursor: pointer;
+  background: none;
+  border: none;
+}
+.collapse-btn:hover {
+  color: #3973e7;
+  background: rgba(57, 115, 231, 0.08);
+  border-radius: 50%;
+}
+
+.card-content {
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+/* Responsividade para mobile */
+@media (max-width: 900px) {
+  .cards-wrapper {
+    max-width: 100vw;
+    padding: 0 5px;
+  }
+}
+
+@media (max-width: 600px) {
+  .cards-wrapper {
+    max-width: 100vw;
+    padding: 0 2px;
+  }
+  .custom-card {
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  .cards-wrapper {
+    padding: 0 5px;
+  }
+  
+  .custom-card {
+    padding: 10px;
+  }
+  
+  .card-title {
+    font-size: 1.1rem;
+  }
+  
+  /* Ocultar algumas colunas em telas muito pequenas */
+  .historico-table .mat-column-valorTotal,
+  .historico-table .mat-column-parcelaTotal {
+    display: none;
+  }
+}
+
+/* Garantir que o layout não ultrapasse 100% */
+.row {
+  margin: 0;
+  max-width: 100%;
+}
+
+.col-12 {
+  padding: 0;
+  max-width: 100%;
+}
+
+/* Melhorar espaçamento dos campos */
+.car-info-section {
+  margin-top: 20px;
+}
+
+.car-info-section h4 {
+  margin-bottom: 15px;
+}
+
+/* Ajustes para os botões de ação */
+.text-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Melhorar visualização do histórico */
+.historico-container {
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.historico-table {
+  min-width: 600px;
+}
+
+@media (max-width: 768px) {
+  .historico-table {
+    min-width: 400px;
+  }
+}
+
+/* Estilos para collapse */
+[hidden] {
+  display: none !important;
 }

@@ -16,6 +16,7 @@ import { MatTableModule } from '@angular/material/table';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { trigger, state, style, transition, animate } from '@angular/animations';
 
 @Component({
   selector: 'app-root',
@@ -23,6 +24,23 @@ import { MatSnackBarModule } from '@angular/material/snack-bar';
   styleUrls: ['./app.component.css'],
   standalone: true,
   providers: [CurrencyPipe],
+  animations: [
+    trigger('slideInOut', [
+      state('expanded', style({
+        height: '*',
+        opacity: 1,
+        overflow: 'hidden'
+      })),
+      state('collapsed', style({
+        height: '0px',
+        opacity: 0,
+        overflow: 'hidden'
+      })),
+      transition('expanded <=> collapsed', [
+        animate('300ms ease-in-out')
+      ])
+    ])
+  ],
   imports: [
     CommonModule,
     FormsModule,
@@ -56,7 +74,6 @@ export class AppComponent implements OnInit {
   @ViewChild("anoFabricacao") anoFabricacao!: ElementRef;
   @ViewChild("anoModelo") anoModelo!: ElementRef;
   @ViewChild("placa") placa!: ElementRef;
-  @ViewChild("chassi") chassi!: ElementRef;
   @ViewChild("renavam") renavam!: ElementRef;
   @ViewChild("observacoes") observacoes!: ElementRef;
 
@@ -81,6 +98,10 @@ export class AppComponent implements OnInit {
   simulacoesHistorico: SimulacaoHistorico[] = [];
   mostrarHistorico: boolean = false;
   colunasHistorico: string[] = ['data', 'carro', 'valorTotal', 'parcelaTotal', 'numParcelas', 'taxaJuros', 'banco', 'acoes'];
+  
+  // Propriedades para collapse dos cards
+  cardFipeCollapsed: boolean = false;
+  cardCalculadoraCollapsed: boolean = false;
   
   // FormControls para os selects
   situacaoCarroControl = new FormControl('');
@@ -302,7 +323,6 @@ export class AppComponent implements OnInit {
       anoFabricacao: this.anoFabricacao?.nativeElement?.value || '',
       anoModelo: this.anoModelo?.nativeElement?.value || '',
       placa: this.placa?.nativeElement?.value || '',
-      chassi: this.chassi?.nativeElement?.value || '',
       renavam: this.renavam?.nativeElement?.value || '',
       // Dados adicionais da FIPE
       codigoVeiculo: this.codigoVeiculo,
@@ -401,7 +421,6 @@ export class AppComponent implements OnInit {
     if (this.anoFabricacao?.nativeElement) this.anoFabricacao.nativeElement.value = simulacao.anoFabricacao || '';
     if (this.anoModelo?.nativeElement) this.anoModelo.nativeElement.value = simulacao.anoModelo || '';
     if (this.placa?.nativeElement) this.placa.nativeElement.value = simulacao.placa || '';
-    if (this.chassi?.nativeElement) this.chassi.nativeElement.value = simulacao.chassi || '';
     if (this.renavam?.nativeElement) this.renavam.nativeElement.value = simulacao.renavam || '';
     
     // Carregar campos select usando FormControls
@@ -553,7 +572,15 @@ export class AppComponent implements OnInit {
     if (this.anoFabricacao?.nativeElement) this.anoFabricacao.nativeElement.value = '';
     if (this.anoModelo?.nativeElement) this.anoModelo.nativeElement.value = '';
     if (this.placa?.nativeElement) this.placa.nativeElement.value = '';
-    if (this.chassi?.nativeElement) this.chassi.nativeElement.value = '';
     if (this.renavam?.nativeElement) this.renavam.nativeElement.value = '';
+  }
+
+  // Métodos para controlar collapse dos cards
+  toggleCardFipe(): void {
+    this.cardFipeCollapsed = !this.cardFipeCollapsed;
+  }
+
+  toggleCardCalculadora(): void {
+    this.cardCalculadoraCollapsed = !this.cardCalculadoraCollapsed;
   }
 }
