@@ -4,7 +4,7 @@ import { FormBuilder } from '@angular/forms';
 import { Marca, Modelo, ModeloAno, ResultadoFipe, TaxaJuros, ResultadoTaxaJuros, SimulacaoHistorico } from './app.model';
 import { AppService } from './app.services';
 import { CommonModule, CurrencyPipe } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule, FormControl } from '@angular/forms';
 import { MatSelectModule } from '@angular/material/select';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
@@ -26,6 +26,7 @@ import { MatSnackBarModule } from '@angular/material/snack-bar';
   imports: [
     CommonModule,
     FormsModule,
+    ReactiveFormsModule,
     MatSelectModule,
     MatInputModule,
     MatButtonModule,
@@ -50,11 +51,8 @@ export class AppComponent implements OnInit {
   
   // Novos campos para informações do carro
   @ViewChild("nomeLoja") nomeLoja!: ElementRef;
-  @ViewChild("situacaoCarro") situacaoCarro!: ElementRef;
   @ViewChild("quilometragem") quilometragem!: ElementRef;
   @ViewChild("cor") cor!: ElementRef;
-  @ViewChild("combustivel") combustivel!: ElementRef;
-  @ViewChild("cambio") cambio!: ElementRef;
   @ViewChild("anoFabricacao") anoFabricacao!: ElementRef;
   @ViewChild("anoModelo") anoModelo!: ElementRef;
   @ViewChild("placa") placa!: ElementRef;
@@ -82,7 +80,19 @@ export class AppComponent implements OnInit {
   // Propriedades para histórico
   simulacoesHistorico: SimulacaoHistorico[] = [];
   mostrarHistorico: boolean = false;
-  colunasHistorico: string[] = ['data', 'carro', 'valorTotal', 'parcelaTotal', 'numParcelas', 'taxaJuros', 'acoes'];
+  colunasHistorico: string[] = ['data', 'carro', 'valorTotal', 'parcelaTotal', 'numParcelas', 'taxaJuros', 'banco', 'acoes'];
+  
+  // FormControls para os selects
+  situacaoCarroControl = new FormControl('');
+  combustivelControl = new FormControl('');
+  cambioControl = new FormControl('');
+  
+  // FormControls para FIPE e banco
+  veiculoControl = new FormControl('');
+  marcaControl = new FormControl('');
+  modeloControl = new FormControl('');
+  anoControl = new FormControl('');
+  bancoControl = new FormControl('');
 
   constructor(private appService: AppService, private currencyPipe: CurrencyPipe) { }
 
@@ -138,7 +148,6 @@ export class AppComponent implements OnInit {
       data => {
         this.taxasJuros = data.conteudo;
         this.carregandoTaxas = false;
-        console.log('Taxas de juros carregadas:', this.taxasJuros);
       },
       error => {
         console.error('Erro ao carregar taxas de juros:', error);
@@ -154,7 +163,6 @@ export class AppComponent implements OnInit {
       data => {
         this.taxasJuros = data.conteudo;
         this.dataTaxasJuros = '2025-06-06 (fallback)';
-        console.log('Taxas de juros carregadas (fallback):', this.taxasJuros);
       },
       error => {
         console.error('Erro no fallback também:', error);
@@ -162,11 +170,15 @@ export class AppComponent implements OnInit {
     );
   }
 
-  selecionarTaxaJuros(taxa: TaxaJuros) {
-    // Converte a taxa de juros ao mês para número e define no campo
-    const taxaNumerica = parseFloat(taxa.TaxaJurosAoMes.replace(',', '.'));
-    this.taxaJuros.nativeElement.value = taxaNumerica.toFixed(2);
-    this.clearParcelaIdeal();
+  selecionarTaxaJuros(posicaoTaxa: string) {
+    // Encontrar a taxa pelo posição
+    const taxa = this.taxasJuros.find(t => t.Posicao === parseInt(posicaoTaxa));
+    if (taxa) {
+      // Converte a taxa de juros ao mês para número e define no campo
+      const taxaNumerica = parseFloat(taxa.TaxaJurosAoMes.replace(',', '.'));
+      this.taxaJuros.nativeElement.value = taxaNumerica.toFixed(2);
+      // Removido o clearParcelaIdeal() para não limpar a parcela automaticamente
+    }
   }
 
   calcular() {
@@ -282,16 +294,28 @@ export class AppComponent implements OnInit {
       // Novos campos
       nomeLoja: this.nomeLoja?.nativeElement?.value || '',
       observacoes: this.observacoes?.nativeElement?.value || '',
-      situacaoCarro: this.situacaoCarro?.nativeElement?.value || '',
+      situacaoCarro: this.situacaoCarroControl.value || '',
       quilometragem: this.quilometragem?.nativeElement?.value || '',
       cor: this.cor?.nativeElement?.value || '',
-      combustivel: this.combustivel?.nativeElement?.value || '',
-      cambio: this.cambio?.nativeElement?.value || '',
+      combustivel: this.combustivelControl.value || '',
+      cambio: this.cambioControl.value || '',
       anoFabricacao: this.anoFabricacao?.nativeElement?.value || '',
       anoModelo: this.anoModelo?.nativeElement?.value || '',
       placa: this.placa?.nativeElement?.value || '',
       chassi: this.chassi?.nativeElement?.value || '',
-      renavam: this.renavam?.nativeElement?.value || ''
+      renavam: this.renavam?.nativeElement?.value || '',
+      // Dados adicionais da FIPE
+      codigoVeiculo: this.codigoVeiculo,
+      codigoMarca: this.codigoMarca,
+      codigoModelo: this.codigoModelo,
+      codigoAno: this.codigoAno,
+      mesReferenciaFipe: this.resultadoFipe?.MesReferencia || '',
+      combustivelFipe: this.resultadoFipe?.Combustivel || '',
+      siglaCombustivelFipe: this.resultadoFipe?.SiglaCombustivel || '',
+      // Dados adicionais do banco
+      taxaJurosAoMes: this.obterTaxaJurosAoMes(),
+      taxaJurosAoAno: this.obterTaxaJurosAoAno(),
+      posicaoTaxa: this.obterPosicaoTaxa()
     };
 
     this.appService.salvarSimulacao(simulacao);
@@ -304,6 +328,7 @@ export class AppComponent implements OnInit {
   }
 
   carregarSimulacao(simulacao: SimulacaoHistorico): void {
+    // Carregar campos principais
     this.valorTotal.nativeElement.value = simulacao.valorTotal;
     this.entrada.nativeElement.value = simulacao.entrada;
     this.parcelaResidual.nativeElement.value = simulacao.parcelaResidual;
@@ -311,20 +336,90 @@ export class AppComponent implements OnInit {
     this.taxaJuros.nativeElement.value = simulacao.taxaJuros.toString();
     this.parcelaTotal.nativeElement.value = simulacao.parcelaTotal;
     
-    // Carregar novos campos
+    // Carregar dados da FIPE se disponíveis
+    if (simulacao.valorFipe) {
+      this.valorFIPE = simulacao.valorFipe;
+    }
+    
+    // Carregar dados da FIPE (códigos e informações)
+    if (simulacao.codigoVeiculo) {
+      this.codigoVeiculo = simulacao.codigoVeiculo;
+      this.veiculoControl.setValue(simulacao.codigoVeiculo);
+      // Carregar marcas se tiver código do veículo
+      this.getMarcas(simulacao.codigoVeiculo);
+    }
+    
+    if (simulacao.codigoMarca) {
+      this.codigoMarca = simulacao.codigoMarca;
+      this.marcaControl.setValue(simulacao.codigoMarca);
+      // Carregar modelos se tiver código da marca
+      setTimeout(() => {
+        if (simulacao.codigoMarca) {
+          this.getModelos(simulacao.codigoMarca);
+        }
+      }, 500);
+    }
+    
+    if (simulacao.codigoModelo) {
+      this.codigoModelo = simulacao.codigoModelo;
+      this.modeloControl.setValue(simulacao.codigoModelo);
+      // Carregar anos se tiver código do modelo
+      setTimeout(() => {
+        if (simulacao.codigoModelo) {
+          this.getAnos(simulacao.codigoModelo);
+        }
+      }, 1000);
+    }
+    
+    if (simulacao.codigoAno) {
+      this.codigoAno = simulacao.codigoAno;
+      this.anoControl.setValue(simulacao.codigoAno);
+      // Carregar resultado FIPE se tiver código do ano
+      setTimeout(() => {
+        if (simulacao.codigoAno) {
+          this.getResultado(simulacao.codigoAno);
+        }
+      }, 1500);
+    }
+    
+    // Carregar dados do banco se disponíveis
+    if (simulacao.posicaoTaxa && simulacao.posicaoTaxa > 0) {
+      const posicaoTaxa = simulacao.posicaoTaxa;
+      setTimeout(() => {
+        // Definir o valor do FormControl do banco
+        this.bancoControl.setValue(posicaoTaxa.toString());
+        // Selecionar a taxa sem limpar a parcela
+        this.selecionarTaxaJuros(posicaoTaxa.toString());
+      }, 2000);
+    }
+    
+    // Carregar novos campos de texto
     if (this.nomeLoja?.nativeElement) this.nomeLoja.nativeElement.value = simulacao.nomeLoja || '';
     if (this.observacoes?.nativeElement) this.observacoes.nativeElement.value = simulacao.observacoes || '';
-    if (this.situacaoCarro?.nativeElement) this.situacaoCarro.nativeElement.value = simulacao.situacaoCarro || '';
     if (this.quilometragem?.nativeElement) this.quilometragem.nativeElement.value = simulacao.quilometragem || '';
     if (this.cor?.nativeElement) this.cor.nativeElement.value = simulacao.cor || '';
-    if (this.combustivel?.nativeElement) this.combustivel.nativeElement.value = simulacao.combustivel || '';
-    if (this.cambio?.nativeElement) this.cambio.nativeElement.value = simulacao.cambio || '';
     if (this.anoFabricacao?.nativeElement) this.anoFabricacao.nativeElement.value = simulacao.anoFabricacao || '';
     if (this.anoModelo?.nativeElement) this.anoModelo.nativeElement.value = simulacao.anoModelo || '';
     if (this.placa?.nativeElement) this.placa.nativeElement.value = simulacao.placa || '';
     if (this.chassi?.nativeElement) this.chassi.nativeElement.value = simulacao.chassi || '';
     if (this.renavam?.nativeElement) this.renavam.nativeElement.value = simulacao.renavam || '';
+    
+    // Carregar campos select usando FormControls
+    if (simulacao.situacaoCarro) {
+      this.situacaoCarroControl.setValue(simulacao.situacaoCarro);
+    }
+    if (simulacao.combustivel) {
+      this.combustivelControl.setValue(simulacao.combustivel);
+    }
+    if (simulacao.cambio) {
+      this.cambioControl.setValue(simulacao.cambio);
+    }
+    
+    // Fechar o modal após carregar os dados
+    this.fecharHistorico();
   }
+
+
 
   alternarHistorico(): void {
     this.mostrarHistorico = !this.mostrarHistorico;
@@ -397,5 +492,68 @@ export class AppComponent implements OnInit {
   private obterAnoSelecionado(): string {
     const ano = this.anos.find(a => a.codigo === this.codigoAno);
     return ano?.nome || '';
+  }
+
+  private obterTaxaJurosAoMes(): string {
+    const taxaSelecionada = this.taxasJuros.find(t => 
+      parseFloat(t.TaxaJurosAoMes.replace(',', '.')) === parseFloat(this.taxaJuros.nativeElement.value)
+    );
+    return taxaSelecionada?.TaxaJurosAoMes || '';
+  }
+
+  private obterTaxaJurosAoAno(): string {
+    const taxaSelecionada = this.taxasJuros.find(t => 
+      parseFloat(t.TaxaJurosAoMes.replace(',', '.')) === parseFloat(this.taxaJuros.nativeElement.value)
+    );
+    return taxaSelecionada?.TaxaJurosAoAno || '';
+  }
+
+  private obterPosicaoTaxa(): number {
+    const taxaSelecionada = this.taxasJuros.find(t => 
+      parseFloat(t.TaxaJurosAoMes.replace(',', '.')) === parseFloat(this.taxaJuros.nativeElement.value)
+    );
+    return taxaSelecionada?.Posicao || 0;
+  }
+
+  limparTela(): void {
+    // Limpar campos principais
+    this.valorTotal.nativeElement.value = '';
+    this.entrada.nativeElement.value = '';
+    this.parcelaResidual.nativeElement.value = '';
+    this.numParcelas.nativeElement.value = '36';
+    this.taxaJuros.nativeElement.value = '';
+    this.parcelaTotal.nativeElement.value = '';
+    
+    // Limpar dados da FIPE
+    this.valorFIPE = '';
+    this.resultadoFipe = undefined;
+    this.codigoVeiculo = '';
+    this.codigoMarca = '';
+    this.codigoModelo = '';
+    this.codigoAno = '';
+    this.marcas = [];
+    this.modelos = [];
+    this.anos = [];
+    
+    // Limpar FormControls
+    this.veiculoControl.setValue('');
+    this.marcaControl.setValue('');
+    this.modeloControl.setValue('');
+    this.anoControl.setValue('');
+    this.bancoControl.setValue('');
+    this.situacaoCarroControl.setValue('');
+    this.combustivelControl.setValue('');
+    this.cambioControl.setValue('');
+    
+    // Limpar campos de texto
+    if (this.nomeLoja?.nativeElement) this.nomeLoja.nativeElement.value = '';
+    if (this.observacoes?.nativeElement) this.observacoes.nativeElement.value = '';
+    if (this.quilometragem?.nativeElement) this.quilometragem.nativeElement.value = '';
+    if (this.cor?.nativeElement) this.cor.nativeElement.value = '';
+    if (this.anoFabricacao?.nativeElement) this.anoFabricacao.nativeElement.value = '';
+    if (this.anoModelo?.nativeElement) this.anoModelo.nativeElement.value = '';
+    if (this.placa?.nativeElement) this.placa.nativeElement.value = '';
+    if (this.chassi?.nativeElement) this.chassi.nativeElement.value = '';
+    if (this.renavam?.nativeElement) this.renavam.nativeElement.value = '';
   }
 }

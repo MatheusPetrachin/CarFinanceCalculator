@@ -76,4 +76,16 @@ export interface SimulacaoHistorico {
     placa?: string;
     chassi?: string;
     renavam?: string;
+    // Dados adicionais da FIPE
+    codigoVeiculo?: string;
+    codigoMarca?: string;
+    codigoModelo?: string;
+    codigoAno?: string;
+    mesReferenciaFipe?: string;
+    combustivelFipe?: string;
+    siglaCombustivelFipe?: string;
+    // Dados adicionais do banco
+    taxaJurosAoMes?: string;
+    taxaJurosAoAno?: string;
+    posicaoTaxa?: number;
 }

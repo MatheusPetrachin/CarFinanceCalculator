@@ -14,7 +14,7 @@
                     <mat-label>Veículo</mat-label>
                     <span matPrefix class="material-icons"
                         style="color:#3973e7; margin-right:8px;">directions_car</span>
-                    <mat-select (selectionChange)='getMarcas($event.value)'>
+                    <mat-select [formControl]="veiculoControl" (selectionChange)='getMarcas($event.value)'>
                         <mat-option value="carros">Carros</mat-option>
                         <mat-option value="motos">Motos</mat-option>
                     </mat-select>
@@ -24,7 +24,7 @@
                 <mat-form-field class="col-12">
                     <mat-label>Marcas</mat-label>
                     <span matPrefix class="material-icons" style="color:#3973e7; margin-right:8px;">local_offer</span>
-                    <mat-select (selectionChange)='getModelos($event.value)'>
+                    <mat-select [formControl]="marcaControl" (selectionChange)='getModelos($event.value)'>
                         <mat-option *ngFor="let marca of marcas" [value]="marca.codigo">
                             {{marca.nome}}
                         </mat-option>
@@ -35,7 +35,7 @@
                 <mat-form-field class="col-12">
                     <mat-label>Modelos</mat-label>
                     <span matPrefix class="material-icons" style="color:#3973e7; margin-right:8px;">commute</span>
-                    <mat-select (selectionChange)='getAnos($event.value)'>
+                    <mat-select [formControl]="modeloControl" (selectionChange)='getAnos($event.value)'>
                         <mat-option *ngFor="let modelo of modelos" [value]="modelo.codigo">
                             {{modelo.nome}}
                         </mat-option>
@@ -47,7 +47,7 @@
                     <mat-label>Anos</mat-label>
                     <span matPrefix class="material-icons"
                         style="color:#3973e7; margin-right:8px;">calendar_today</span>
-                    <mat-select (selectionChange)='getResultado($event.value)'>
+                    <mat-select [formControl]="anoControl" (selectionChange)='getResultado($event.value)'>
                         <mat-option *ngFor="let ano of anos" [value]="ano.codigo">
                             {{ano.nome}}
                         </mat-option>
@@ -82,7 +82,7 @@
                         <mat-form-field class="col-12">
                             <mat-label>Situação do Carro</mat-label>
                             <span matPrefix class="material-icons" style="color:#3973e7; margin-right:8px;">assessment</span>
-                            <mat-select #situacaoCarro>
+                            <mat-select [formControl]="situacaoCarroControl">
                                 <mat-option value="Novo">Novo</mat-option>
                                 <mat-option value="Semi-novo">Semi-novo</mat-option>
                                 <mat-option value="Usado">Usado</mat-option>
@@ -114,7 +114,7 @@
                         <mat-form-field class="col-12">
                             <mat-label>Combustível</mat-label>
                             <span matPrefix class="material-icons" style="color:#3973e7; margin-right:8px;">local_gas_station</span>
-                            <mat-select #combustivel>
+                            <mat-select [formControl]="combustivelControl">
                                 <mat-option value="Flex">Flex</mat-option>
                                 <mat-option value="Gasolina">Gasolina</mat-option>
                                 <mat-option value="Etanol">Etanol</mat-option>
@@ -128,7 +128,7 @@
                         <mat-form-field class="col-12">
                             <mat-label>Câmbio</mat-label>
                             <span matPrefix class="material-icons" style="color:#3973e7; margin-right:8px;">settings</span>
-                            <mat-select #cambio>
+                            <mat-select [formControl]="cambioControl">
                                 <mat-option value="Manual">Manual</mat-option>
                                 <mat-option value="Automático">Automático</mat-option>
                                 <mat-option value="CVT">CVT</mat-option>
@@ -238,8 +238,8 @@
                     <mat-label>Banco/Instituição Financeira</mat-label>
                     <span matPrefix class="material-icons"
                         style="color:#3973e7; margin-right:8px;">account_balance</span>
-                    <mat-select (selectionChange)='selecionarTaxaJuros($event.value)' placeholder="Selecione um banco">
-                        <mat-option *ngFor="let taxa of taxasJuros" [value]="taxa">
+                    <mat-select [formControl]="bancoControl" (selectionChange)='selecionarTaxaJuros($event.value)' placeholder="Selecione um banco">
+                        <mat-option *ngFor="let taxa of taxasJuros" [value]="taxa.Posicao.toString()">
                             {{taxa.InstituicaoFinanceira}} - {{taxa.TaxaJurosAoMes}}% ao mês ({{taxa.TaxaJurosAoAno}}%
                             ao ano)
                         </mat-option>
@@ -276,13 +276,21 @@
 <!-- Botão para mostrar/ocultar histórico -->
 <div class="row mt-4">
     <div class="col-12 text-center">
-        <button mat-raised-button 
-                class="button-secondary" 
-                (click)="alternarHistorico()"
-                style="margin-bottom: 20px;">
-            <span class="material-icons" style="margin-right: 8px;">history</span>
-            {{ mostrarHistorico ? 'Ocultar' : 'Mostrar' }} Histórico de Simulações
-        </button>
+        <div style="display: flex; justify-content: center; align-items: center; gap: 10px; margin-bottom: 20px;">
+            <button mat-raised-button 
+                    class="button-secondary" 
+                    (click)="alternarHistorico()">
+                <span class="material-icons" style="margin-right: 8px;">history</span>
+                {{ mostrarHistorico ? 'Ocultar' : 'Mostrar' }} Histórico de Simulações
+            </button>
+            <button mat-icon-button 
+                    class="button-secondary" 
+                    (click)="limparTela()"
+                    style="display: flex; align-items: center; justify-content: center;"
+                    title="Limpar tela">
+                <span class="material-icons" style="font-size: 20px;">cleaning_services</span>
+            </button>
+        </div>
     </div>
 </div>
 
@@ -359,6 +367,15 @@
                     <ng-container matColumnDef="taxaJuros">
                         <th mat-header-cell *matHeaderCellDef>Taxa</th>
                         <td mat-cell *matCellDef="let simulacao">{{ simulacao.taxaJuros }}%</td>
+                    </ng-container>
+
+                    <!-- Banco -->
+                    <ng-container matColumnDef="banco">
+                        <th mat-header-cell *matHeaderCellDef>Banco</th>
+                        <td mat-cell *matCellDef="let simulacao">
+                            <span *ngIf="simulacao.instituicaoFinanceira">{{ simulacao.instituicaoFinanceira }}</span>
+                            <span *ngIf="!simulacao.instituicaoFinanceira" style="color: #ccc;">-</span>
+                        </td>
                     </ng-container>
 
                     <!-- Ações -->
