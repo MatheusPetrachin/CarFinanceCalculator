@@ -62,6 +62,135 @@
                     <strong>Mês Referência FIPE:</strong> {{resultadoFipe.MesReferencia}}
                 </div>
             </div>
+            
+            <!-- Campos adicionais para informações do carro -->
+            <div class="car-info-section">
+                <h4 style="color: #3973e7; margin-bottom: 1rem;">
+                    <span class="material-icons" style="font-size: 1.2rem; margin-right: 8px;">info</span>
+                    Informações Adicionais do Carro
+                </h4>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <mat-form-field class="col-12">
+                            <mat-label>Nome da Loja/Concessionária</mat-label>
+                            <span matPrefix class="material-icons" style="color:#3973e7; margin-right:8px;">store</span>
+                            <input matInput #nomeLoja placeholder="Ex: Concessionária ABC Ltda">
+                        </mat-form-field>
+                    </div>
+                    <div class="col-md-6">
+                        <mat-form-field class="col-12">
+                            <mat-label>Situação do Carro</mat-label>
+                            <span matPrefix class="material-icons" style="color:#3973e7; margin-right:8px;">assessment</span>
+                            <mat-select #situacaoCarro>
+                                <mat-option value="Novo">Novo</mat-option>
+                                <mat-option value="Semi-novo">Semi-novo</mat-option>
+                                <mat-option value="Usado">Usado</mat-option>
+                                <mat-option value="Seminovos">Seminovos</mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <mat-form-field class="col-12">
+                            <mat-label>Quilometragem</mat-label>
+                            <span matPrefix class="material-icons" style="color:#3973e7; margin-right:8px;">speed</span>
+                            <input matInput #quilometragem placeholder="Ex: 45.000 km">
+                        </mat-form-field>
+                    </div>
+                    <div class="col-md-6">
+                        <mat-form-field class="col-12">
+                            <mat-label>Cor</mat-label>
+                            <span matPrefix class="material-icons" style="color:#3973e7; margin-right:8px;">palette</span>
+                            <input matInput #cor placeholder="Ex: Prata">
+                        </mat-form-field>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <mat-form-field class="col-12">
+                            <mat-label>Combustível</mat-label>
+                            <span matPrefix class="material-icons" style="color:#3973e7; margin-right:8px;">local_gas_station</span>
+                            <mat-select #combustivel>
+                                <mat-option value="Flex">Flex</mat-option>
+                                <mat-option value="Gasolina">Gasolina</mat-option>
+                                <mat-option value="Etanol">Etanol</mat-option>
+                                <mat-option value="Diesel">Diesel</mat-option>
+                                <mat-option value="Híbrido">Híbrido</mat-option>
+                                <mat-option value="Elétrico">Elétrico</mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                    </div>
+                    <div class="col-md-6">
+                        <mat-form-field class="col-12">
+                            <mat-label>Câmbio</mat-label>
+                            <span matPrefix class="material-icons" style="color:#3973e7; margin-right:8px;">settings</span>
+                            <mat-select #cambio>
+                                <mat-option value="Manual">Manual</mat-option>
+                                <mat-option value="Automático">Automático</mat-option>
+                                <mat-option value="CVT">CVT</mat-option>
+                                <mat-option value="Semi-automático">Semi-automático</mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <mat-form-field class="col-12">
+                            <mat-label>Ano de Fabricação</mat-label>
+                            <span matPrefix class="material-icons" style="color:#3973e7; margin-right:8px;">calendar_today</span>
+                            <input matInput #anoFabricacao type="number" placeholder="Ex: 2022">
+                        </mat-form-field>
+                    </div>
+                    <div class="col-md-6">
+                        <mat-form-field class="col-12">
+                            <mat-label>Ano do Modelo</mat-label>
+                            <span matPrefix class="material-icons" style="color:#3973e7; margin-right:8px;">calendar_today</span>
+                            <input matInput #anoModelo type="number" placeholder="Ex: 2023">
+                        </mat-form-field>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-4">
+                        <mat-form-field class="col-12">
+                            <mat-label>Placa</mat-label>
+                            <span matPrefix class="material-icons" style="color:#3973e7; margin-right:8px;">directions_car</span>
+                            <input matInput #placa placeholder="Ex: ABC-1234">
+                        </mat-form-field>
+                    </div>
+                    <div class="col-md-4">
+                        <mat-form-field class="col-12">
+                            <mat-label>Chassi</mat-label>
+                            <span matPrefix class="material-icons" style="color:#3973e7; margin-right:8px;">fingerprint</span>
+                            <input matInput #chassi placeholder="Ex: 9BWZZZ377VT004251">
+                        </mat-form-field>
+                    </div>
+                    <div class="col-md-4">
+                        <mat-form-field class="col-12">
+                            <mat-label>RENAVAM</mat-label>
+                            <span matPrefix class="material-icons" style="color:#3973e7; margin-right:8px;">receipt</span>
+                            <input matInput #renavam placeholder="Ex: 12345678901">
+                        </mat-form-field>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-12">
+                        <mat-form-field class="col-12">
+                            <mat-label>Observações e Impressões</mat-label>
+                            <span matPrefix class="material-icons" style="color:#3973e7; margin-right:8px;">edit_note</span>
+                            <textarea matInput #observacoes 
+                                      placeholder="Descreva suas impressões sobre o carro, estado de conservação, opcionais, histórico de manutenção, etc..."
+                                      rows="4"></textarea>
+                        </mat-form-field>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- Card 2: Calculadora de Financiamento -->
@@ -132,7 +261,6 @@
             </div>
             <div class="text-center">
                 <button mat-raised-button class="button-primary" (click)="calcular()">Calcular financiamento</button>
-
             </div>
             <div class="mt-3">
                 <mat-form-field class="col-12">
@@ -140,6 +268,121 @@
                     <span matPrefix class="material-icons" style="color:#3973e7; margin-right:8px;">attach_money</span>
                     <input matInput type="text" #parcelaTotal placeholder="R$ 0,00" (input)="onInput($event)">
                 </mat-form-field>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Botão para mostrar/ocultar histórico -->
+<div class="row mt-4">
+    <div class="col-12 text-center">
+        <button mat-raised-button 
+                class="button-secondary" 
+                (click)="alternarHistorico()"
+                style="margin-bottom: 20px;">
+            <span class="material-icons" style="margin-right: 8px;">history</span>
+            {{ mostrarHistorico ? 'Ocultar' : 'Mostrar' }} Histórico de Simulações
+        </button>
+    </div>
+</div>
+
+<!-- Tabela de histórico -->
+<div class="historico-container" *ngIf="mostrarHistorico" (click)="onHistoricoClick($event)">
+    <div class="historico-wrapper">
+        <div class="custom-card historico-card">
+            <div class="card-header">
+                <div class="card-title">
+                    <span class="material-icons" style="font-size:2.2rem;color:#3973e7;">history</span>
+                    Histórico de Simulações
+                </div>
+                <button mat-icon-button 
+                        class="fechar-btn" 
+                        (click)="fecharHistorico()"
+                        title="Fechar">
+                    <span class="material-icons">close</span>
+                </button>
+            </div>
+            <div class="card-subtitle">
+                Suas simulações salvas automaticamente
+            </div>
+            
+            <div *ngIf="simulacoesHistorico.length === 0" class="text-center" style="padding: 20px;">
+                <span class="material-icons" style="font-size: 3rem; color: #ccc;">history</span>
+                <p>Nenhuma simulação encontrada no histórico.</p>
+                <p>Faça uma simulação para que ela apareça aqui automaticamente.</p>
+            </div>
+
+            <div *ngIf="simulacoesHistorico.length > 0">
+                <table mat-table [dataSource]="simulacoesHistorico" class="historico-table">
+                    <!-- Data -->
+                    <ng-container matColumnDef="data">
+                        <th mat-header-cell *matHeaderCellDef>Data</th>
+                        <td mat-cell *matCellDef="let simulacao">{{ formatarData(simulacao.data) }}</td>
+                    </ng-container>
+
+                    <!-- Carro -->
+                    <ng-container matColumnDef="carro">
+                        <th mat-header-cell *matHeaderCellDef>Carro</th>
+                        <td mat-cell *matCellDef="let simulacao">
+                            <div class="carro-info">
+                                <div class="carro-principal">{{ formatarInfoCarro(simulacao) }}</div>
+                                <div class="carro-detalhes" *ngIf="simulacao.nomeLoja || simulacao.situacaoCarro">
+                                    <small>
+                                        <span *ngIf="simulacao.nomeLoja">{{ simulacao.nomeLoja }}</span>
+                                        <span *ngIf="simulacao.nomeLoja && simulacao.situacaoCarro"> • </span>
+                                        <span *ngIf="simulacao.situacaoCarro">{{ simulacao.situacaoCarro }}</span>
+                                    </small>
+                                </div>
+                            </div>
+                        </td>
+                    </ng-container>
+
+                    <!-- Valor Total -->
+                    <ng-container matColumnDef="valorTotal">
+                        <th mat-header-cell *matHeaderCellDef>Valor Total</th>
+                        <td mat-cell *matCellDef="let simulacao">{{ simulacao.valorTotal }}</td>
+                    </ng-container>
+
+                    <!-- Parcela Total -->
+                    <ng-container matColumnDef="parcelaTotal">
+                        <th mat-header-cell *matHeaderCellDef>Parcela</th>
+                        <td mat-cell *matCellDef="let simulacao">{{ simulacao.parcelaTotal }}</td>
+                    </ng-container>
+
+                    <!-- Número de Parcelas -->
+                    <ng-container matColumnDef="numParcelas">
+                        <th mat-header-cell *matHeaderCellDef>Parcelas</th>
+                        <td mat-cell *matCellDef="let simulacao">{{ simulacao.numParcelas }}x</td>
+                    </ng-container>
+
+                    <!-- Taxa de Juros -->
+                    <ng-container matColumnDef="taxaJuros">
+                        <th mat-header-cell *matHeaderCellDef>Taxa</th>
+                        <td mat-cell *matCellDef="let simulacao">{{ simulacao.taxaJuros }}%</td>
+                    </ng-container>
+
+                    <!-- Ações -->
+                    <ng-container matColumnDef="acoes">
+                        <th mat-header-cell *matHeaderCellDef>Ações</th>
+                        <td mat-cell *matCellDef="let simulacao">
+                            <button mat-icon-button 
+                                    color="primary" 
+                                    (click)="carregarSimulacao(simulacao)"
+                                    title="Carregar simulação">
+                                <span class="material-icons">visibility</span>
+                            </button>
+                            <button mat-icon-button 
+                                    color="warn" 
+                                    (click)="deletarSimulacao(simulacao.id)"
+                                    title="Deletar simulação">
+                                <span class="material-icons">delete</span>
+                            </button>
+                        </td>
+                    </ng-container>
+
+                    <tr mat-header-row *matHeaderRowDef="colunasHistorico"></tr>
+                    <tr mat-row *matRowDef="let row; columns: colunasHistorico;"></tr>
+                </table>
             </div>
         </div>
     </div>

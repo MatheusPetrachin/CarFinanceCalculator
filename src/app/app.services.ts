@@ -1,7 +1,7 @@
 import { Injectable } from "@angular/core";
 import { environment } from "../environments/environment";
 import { HttpClient } from '@angular/common/http';
-import { Marca, ModeloAno, Modelo, ResultadoFipe, TaxaJuros, ResultadoTaxaJuros, PeriodosDisponiveis } from "./app.model";
+import { Marca, ModeloAno, Modelo, ResultadoFipe, TaxaJuros, ResultadoTaxaJuros, PeriodosDisponiveis, SimulacaoHistorico } from "./app.model";
 import { Observable } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 
@@ -60,5 +60,39 @@ export class AppService {
     getPeriodosDisponiveis(): Observable<PeriodosDisponiveis> {
         const url = this.APIBCBPeriodosUrl + 'PeriodosDisponiveis';
         return this.http.get<PeriodosDisponiveis>(url);
+    }
+
+    // Métodos para gerenciar histórico de simulações
+    private readonly STORAGE_KEY = 'simulacoes_historico';
+
+    salvarSimulacao(simulacao: Omit<SimulacaoHistorico, 'id' | 'data'>): void {
+        const simulacoes = this.obterSimulacoes();
+        const novaSimulacao: SimulacaoHistorico = {
+            ...simulacao,
+            id: this.gerarId(),
+            data: new Date().toISOString()
+        };
+
+        simulacoes.unshift(novaSimulacao); // Adiciona no início da lista
+        localStorage.setItem(this.STORAGE_KEY, JSON.stringify(simulacoes));
+    }
+
+    obterSimulacoes(): SimulacaoHistorico[] {
+        const dados = localStorage.getItem(this.STORAGE_KEY);
+        return dados ? JSON.parse(dados) : [];
+    }
+
+    deletarSimulacao(id: string): void {
+        const simulacoes = this.obterSimulacoes();
+        const simulacoesFiltradas = simulacoes.filter(s => s.id !== id);
+        localStorage.setItem(this.STORAGE_KEY, JSON.stringify(simulacoesFiltradas));
+    }
+
+    limparHistorico(): void {
+        localStorage.removeItem(this.STORAGE_KEY);
+    }
+
+    private gerarId(): string {
+        return Date.now().toString() + Math.random().toString(36).substr(2, 9);
     }
 }

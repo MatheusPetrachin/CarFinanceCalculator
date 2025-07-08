@@ -45,3 +45,35 @@ export class PeriodosDisponiveis {
     "@odata.context"!: string;
     value!: PeriodoDisponivel[];
 }
+
+export interface SimulacaoHistorico {
+    id: string;
+    data: string;
+    valorTotal: string;
+    entrada: string;
+    parcelaResidual: string;
+    numParcelas: number;
+    taxaJuros: number;
+    parcelaTotal: string;
+    valorFinanciado: number;
+    totalJuros: number;
+    totalPago: number;
+    instituicaoFinanceira?: string;
+    marca?: string;
+    modelo?: string;
+    ano?: string;
+    valorFipe?: string;
+    // Novos campos para informações detalhadas
+    nomeLoja?: string;
+    observacoes?: string;
+    situacaoCarro?: string;
+    quilometragem?: string;
+    cor?: string;
+    combustivel?: string;
+    cambio?: string;
+    anoFabricacao?: string;
+    anoModelo?: string;
+    placa?: string;
+    chassi?: string;
+    renavam?: string;
+}
