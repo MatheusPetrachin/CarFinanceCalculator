@@ -1,409 +1,527 @@
-<div class="container">
+<div class="app-shell">
+  <header class="topbar">
+    <a class="brand" href="#inicio" aria-label="AutoFin — início">
+      <span class="brand-mark" aria-hidden="true">
+        <mat-icon>directions_car</mat-icon>
+      </span>
+      <span>
+        <strong>AutoFin</strong>
+        <small>Simulador de financiamento</small>
+      </span>
+    </a>
 
-    <div class="row justify-content-center text-center g-3">
-        
-            <!-- Card 1: FIPE -->
-            <div class="custom-card">
-                <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; cursor: pointer;">
-                    <div class="card-title col-12" (click)="toggleCardFipe()">
-                        <span class="material-icons" style="font-size:2.2rem;color:#3973e7;">directions_car</span>
-                        Consulta FIPE
-                    </div>                
-                </div>
-                <div [hidden]="cardFipeCollapsed">
-                    <div class="card-subtitle">
-                        Consulte o valor do veículo pela tabela FIPE
-                    </div>
-                    <div class="card-content" *ngIf="!cardFipeCollapsed">
-                        <mat-form-field class="col-12">
-                            <mat-label>Veículo</mat-label>
-                            <span matPrefix class="material-icons"
-                                style="color:#3973e7; margin-right:8px;">directions_car</span>
-                            <mat-select [formControl]="veiculoControl" (selectionChange)='getMarcas($event.value)'>
-                                <mat-option value="carros">Carros</mat-option>
-                                <mat-option value="motos">Motos</mat-option>
-                            </mat-select>
-                        </mat-form-field>
-                    </div>
-                    <div>
-                        <mat-form-field class="col-12">
-                            <mat-label>Marcas</mat-label>
-                            <span matPrefix class="material-icons" style="color:#3973e7; margin-right:8px;">local_offer</span>
-                            <mat-select [formControl]="marcaControl" (selectionChange)='getModelos($event.value)'>
-                                <mat-option *ngFor="let marca of marcas" [value]="marca.codigo">
-                                    {{marca.nome}}
-                                </mat-option>
-                            </mat-select>
-                        </mat-form-field>
-                    </div>
-                    <div>
-                        <mat-form-field class="col-12">
-                            <mat-label>Modelos</mat-label>
-                            <span matPrefix class="material-icons" style="color:#3973e7; margin-right:8px;">commute</span>
-                            <mat-select [formControl]="modeloControl" (selectionChange)='getAnos($event.value)'>
-                                <mat-option *ngFor="let modelo of modelos" [value]="modelo.codigo">
-                                    {{modelo.nome}}
-                                </mat-option>
-                            </mat-select>
-                        </mat-form-field>
-                    </div>
-                    <div>
-                        <mat-form-field class="col-12">
-                            <mat-label>Anos</mat-label>
-                            <span matPrefix class="material-icons"
-                                style="color:#3973e7; margin-right:8px;">calendar_today</span>
-                            <mat-select [formControl]="anoControl" (selectionChange)='getResultado($event.value)'>
-                                <mat-option *ngFor="let ano of anos" [value]="ano.codigo">
-                                    {{ano.nome}}
-                                </mat-option>
-                            </mat-select>
-                        </mat-form-field>
-                    </div>
-                    <div *ngIf="resultadoFipe">
-                        <div>
-                            <strong>Valor:</strong> {{resultadoFipe.Valor}}
-                        </div>
-                        <div>
-                            <strong>Mês Referência FIPE:</strong> {{resultadoFipe.MesReferencia}}
-                        </div>
-                    </div>
-                    
-                    <!-- Campos adicionais para informações do carro -->
-                    <div class="car-info-section">
-                        <h4 style="color: #3973e7; margin-bottom: 1rem;">
-                            <span class="material-icons" style="font-size: 1.2rem; margin-right: 8px;">info</span>
-                            Informações Adicionais do Carro
-                        </h4>
-                        
-                        <div class="row">
-                            <div class="col-12">
-                                <mat-form-field class="col-12">
-                                    <mat-label>Nome da Loja/Concessionária</mat-label>
-                                    <span matPrefix class="material-icons" style="color:#3973e7; margin-right:8px;">store</span>
-                                    <input matInput #nomeLoja placeholder="Ex: Concessionária ABC Ltda">
-                                </mat-form-field>
-                            </div>
-                            <div class="col-12">
-                                <mat-form-field class="col-12">
-                                    <mat-label>Situação do Carro</mat-label>
-                                    <span matPrefix class="material-icons" style="color:#3973e7; margin-right:8px;">assessment</span>
-                                    <mat-select [formControl]="situacaoCarroControl">
-                                        <mat-option value="Novo">Novo</mat-option>
-                                        <mat-option value="Semi-novo">Semi-novo</mat-option>
-                                        <mat-option value="Usado">Usado</mat-option>
-                                        <mat-option value="Seminovos">Seminovos</mat-option>
-                                    </mat-select>
-                                </mat-form-field>
-                            </div>
-                        </div>
-                        
-                        <div class="row">
-                            <div class="col-12">
-                                <mat-form-field class="col-12">
-                                    <mat-label>Quilometragem</mat-label>
-                                    <span matPrefix class="material-icons" style="color:#3973e7; margin-right:8px;">speed</span>
-                                    <input matInput #quilometragem placeholder="Ex: 45.000 km">
-                                </mat-form-field>
-                            </div>
-                            <div class="col-12">
-                                <mat-form-field class="col-12">
-                                    <mat-label>Cor</mat-label>
-                                    <span matPrefix class="material-icons" style="color:#3973e7; margin-right:8px;">palette</span>
-                                    <input matInput #cor placeholder="Ex: Prata">
-                                </mat-form-field>
-                            </div>
-                        </div>
-                        
-                        <div class="row">
-                            <div class="col-12">
-                                <mat-form-field class="col-12">
-                                    <mat-label>Combustível</mat-label>
-                                    <span matPrefix class="material-icons" style="color:#3973e7; margin-right:8px;">local_gas_station</span>
-                                    <mat-select [formControl]="combustivelControl">
-                                        <mat-option value="Flex">Flex</mat-option>
-                                        <mat-option value="Gasolina">Gasolina</mat-option>
-                                        <mat-option value="Etanol">Etanol</mat-option>
-                                        <mat-option value="Diesel">Diesel</mat-option>
-                                        <mat-option value="Híbrido">Híbrido</mat-option>
-                                        <mat-option value="Elétrico">Elétrico</mat-option>
-                                    </mat-select>
-                                </mat-form-field>
-                            </div>
-                            <div class="col-12">
-                                <mat-form-field class="col-12">
-                                    <mat-label>Câmbio</mat-label>
-                                    <span matPrefix class="material-icons" style="color:#3973e7; margin-right:8px;">settings</span>
-                                    <mat-select [formControl]="cambioControl">
-                                        <mat-option value="Manual">Manual</mat-option>
-                                        <mat-option value="Automático">Automático</mat-option>
-                                        <mat-option value="CVT">CVT</mat-option>
-                                        <mat-option value="Semi-automático">Semi-automático</mat-option>
-                                    </mat-select>
-                                </mat-form-field>
-                            </div>
-                        </div>
-                        
-                        <div class="row">
-                            <div class="col-12">
-                                <mat-form-field class="col-12">
-                                    <mat-label>Ano de Fabricação</mat-label>
-                                    <span matPrefix class="material-icons" style="color:#3973e7; margin-right:8px;">calendar_today</span>
-                                    <input matInput #anoFabricacao type="number" placeholder="Ex: 2022">
-                                </mat-form-field>
-                            </div>
-                            <div class="col-12">
-                                <mat-form-field class="col-12">
-                                    <mat-label>Ano do Modelo</mat-label>
-                                    <span matPrefix class="material-icons" style="color:#3973e7; margin-right:8px;">calendar_today</span>
-                                    <input matInput #anoModelo type="number" placeholder="Ex: 2023">
-                                </mat-form-field>
-                            </div>
-                        </div>
-                        
-                        <div class="row">
-                            <div class="col-12">
-                                <mat-form-field class="col-12">
-                                    <mat-label>Placa</mat-label>
-                                    <span matPrefix class="material-icons" style="color:#3973e7; margin-right:8px;">directions_car</span>
-                                    <input matInput #placa placeholder="Ex: ABC-1234">
-                                </mat-form-field>
-                            </div>                   
-                            <div class="col-12">
-                                <mat-form-field class="col-12">
-                                    <mat-label>RENAVAM</mat-label>
-                                    <span matPrefix class="material-icons" style="color:#3973e7; margin-right:8px;">receipt</span>
-                                    <input matInput #renavam placeholder="Ex: 12345678901">
-                                </mat-form-field>
-                            </div>
-                        </div>
-                        
-                        <div class="row">
-                            <div class="col-12">
-                                <mat-form-field class="col-12">
-                                    <mat-label>Observações e Impressões</mat-label>
-                                    <span matPrefix class="material-icons" style="color:#3973e7; margin-right:8px;">edit_note</span>
-                                    <textarea matInput #observacoes 
-                                              placeholder="Descreva suas impressões sobre o carro, estado de conservação, opcionais, histórico de manutenção, etc..."
-                                              rows="4"></textarea>
-                                </mat-form-field>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+    <button
+      type="button"
+      mat-button
+      class="history-button"
+      (click)="alternarHistorico()"
+      [attr.aria-expanded]="mostrarHistorico"
+      aria-controls="historico-dialog"
+    >
+      <mat-icon>history</mat-icon>
+      <span>Histórico</span>
+      <span class="history-count" *ngIf="simulacoesHistorico.length">
+        {{ simulacoesHistorico.length }}
+      </span>
+    </button>
+  </header>
+
+  <main id="inicio" class="page-container">
+    <section class="hero" aria-labelledby="page-title">
+      <div class="hero-copy">
+        <span class="eyebrow">
+          <mat-icon aria-hidden="true">verified</mat-icon>
+          FIPE e taxas do Banco Central
+        </span>
+        <h1 id="page-title">Seu próximo carro cabe no seu orçamento?</h1>
+        <p>
+          Consulte o valor de referência do veículo e compare as condições do
+          financiamento em uma simulação simples e transparente.
+        </p>
+      </div>
+
+      <div class="hero-steps" aria-label="Etapas da simulação">
+        <div class="hero-step">
+          <span>1</span>
+          <div>
+            <strong>Escolha o veículo</strong>
+            <small>Use a Tabela FIPE como referência</small>
+          </div>
+        </div>
+        <mat-icon aria-hidden="true">arrow_forward</mat-icon>
+        <div class="hero-step">
+          <span>2</span>
+          <div>
+            <strong>Simule as parcelas</strong>
+            <small>Ajuste entrada, prazo e taxa</small>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="workspace-grid" aria-label="Simulador de financiamento">
+      <article class="surface vehicle-card">
+        <div class="section-heading">
+          <span class="step-number" aria-hidden="true">1</span>
+          <div>
+            <span class="section-kicker">Valor de referência</span>
+            <h2>Qual é o veículo?</h2>
+            <p>Preencha os campos na ordem para consultar a Tabela FIPE.</p>
+          </div>
+        </div>
+
+        <div class="field-grid vehicle-selector-grid">
+          <mat-form-field appearance="outline" subscriptSizing="dynamic">
+            <mat-label>Tipo de veículo</mat-label>
+            <mat-icon matPrefix>directions_car</mat-icon>
+            <mat-select
+              [formControl]="veiculoControl"
+              (selectionChange)="getMarcas($event.value)"
+            >
+              <mat-option value="carros">Carro</mat-option>
+              <mat-option value="motos">Moto</mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" subscriptSizing="dynamic">
+            <mat-label>Marca</mat-label>
+            <mat-icon matPrefix>sell</mat-icon>
+            <mat-select
+              [formControl]="marcaControl"
+              [disabled]="!veiculoControl.value || carregandoConsulta"
+              (selectionChange)="getModelos($event.value)"
+            >
+              <mat-option *ngFor="let marca of marcas" [value]="marca.codigo">
+                {{ marca.nome }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" subscriptSizing="dynamic">
+            <mat-label>Modelo</mat-label>
+            <mat-icon matPrefix>commute</mat-icon>
+            <mat-select
+              [formControl]="modeloControl"
+              [disabled]="!marcaControl.value || carregandoConsulta"
+              (selectionChange)="getAnos($event.value)"
+            >
+              <mat-option *ngFor="let modelo of modelos" [value]="modelo.codigo">
+                {{ modelo.nome }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" subscriptSizing="dynamic">
+            <mat-label>Ano / combustível</mat-label>
+            <mat-icon matPrefix>calendar_today</mat-icon>
+            <mat-select
+              [formControl]="anoControl"
+              [disabled]="!modeloControl.value || carregandoConsulta"
+              (selectionChange)="getResultado($event.value)"
+            >
+              <mat-option *ngFor="let ano of anos" [value]="ano.codigo">
+                {{ ano.nome }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <div class="inline-status" *ngIf="carregandoConsulta" aria-live="polite">
+          <span class="spinner" aria-hidden="true"></span>
+          Consultando dados do veículo…
+        </div>
+
+        <div class="inline-status error" *ngIf="erroConsulta" role="alert">
+          <mat-icon aria-hidden="true">error_outline</mat-icon>
+          {{ erroConsulta }}
+        </div>
+
+        <section class="fipe-result" *ngIf="resultadoFipe" aria-live="polite">
+          <div>
+            <span class="result-label">Valor FIPE</span>
+            <strong>{{ resultadoFipe.Valor }}</strong>
+            <small>{{ resultadoFipe.MesReferencia }}</small>
+          </div>
+          <div class="fipe-meta">
+            <span>{{ resultadoFipe.Marca }}</span>
+            <strong>{{ resultadoFipe.Modelo }}</strong>
+            <small>Código FIPE {{ resultadoFipe.CodigoFipe }}</small>
+          </div>
+          <mat-icon aria-hidden="true">check_circle</mat-icon>
+        </section>
+
+        <div class="details-divider">
+          <button
+            type="button"
+            class="details-toggle"
+            (click)="alternarDetalhesVeiculo()"
+            [attr.aria-expanded]="detalhesVeiculoAbertos"
+            aria-controls="detalhes-veiculo"
+          >
+            <span>
+              <mat-icon aria-hidden="true">add_notes</mat-icon>
+              Adicionar detalhes do veículo
+              <small>Opcional — útil para comparar propostas depois</small>
+            </span>
+            <mat-icon aria-hidden="true">
+              {{ detalhesVeiculoAbertos ? 'expand_less' : 'expand_more' }}
+            </mat-icon>
+          </button>
+        </div>
+
+        <div id="detalhes-veiculo" class="details-panel" *ngIf="detalhesVeiculoAbertos">
+          <div class="field-grid">
+            <mat-form-field appearance="outline" subscriptSizing="dynamic" class="field-wide">
+              <mat-label>Loja ou concessionária</mat-label>
+              <mat-icon matPrefix>storefront</mat-icon>
+              <input matInput #nomeLoja autocomplete="organization" placeholder="Ex.: Concessionária Centro" />
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" subscriptSizing="dynamic">
+              <mat-label>Condição</mat-label>
+              <mat-icon matPrefix>fact_check</mat-icon>
+              <mat-select [formControl]="situacaoCarroControl">
+                <mat-option value="Novo">Novo</mat-option>
+                <mat-option value="Seminovo">Seminovo</mat-option>
+                <mat-option value="Usado">Usado</mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" subscriptSizing="dynamic">
+              <mat-label>Quilometragem</mat-label>
+              <mat-icon matPrefix>speed</mat-icon>
+              <input matInput #quilometragem inputmode="numeric" placeholder="Ex.: 45.000 km" />
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" subscriptSizing="dynamic">
+              <mat-label>Cor</mat-label>
+              <mat-icon matPrefix>palette</mat-icon>
+              <input matInput #cor placeholder="Ex.: Prata" />
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" subscriptSizing="dynamic">
+              <mat-label>Combustível</mat-label>
+              <mat-icon matPrefix>local_gas_station</mat-icon>
+              <mat-select [formControl]="combustivelControl">
+                <mat-option value="Flex">Flex</mat-option>
+                <mat-option value="Gasolina">Gasolina</mat-option>
+                <mat-option value="Etanol">Etanol</mat-option>
+                <mat-option value="Diesel">Diesel</mat-option>
+                <mat-option value="Híbrido">Híbrido</mat-option>
+                <mat-option value="Elétrico">Elétrico</mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" subscriptSizing="dynamic">
+              <mat-label>Câmbio</mat-label>
+              <mat-icon matPrefix>settings</mat-icon>
+              <mat-select [formControl]="cambioControl">
+                <mat-option value="Manual">Manual</mat-option>
+                <mat-option value="Automático">Automático</mat-option>
+                <mat-option value="CVT">CVT</mat-option>
+                <mat-option value="Automatizado">Automatizado</mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" subscriptSizing="dynamic">
+              <mat-label>Ano de fabricação</mat-label>
+              <mat-icon matPrefix>event</mat-icon>
+              <input matInput #anoFabricacao type="number" min="1900" max="2100" placeholder="2024" />
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" subscriptSizing="dynamic">
+              <mat-label>Ano do modelo</mat-label>
+              <mat-icon matPrefix>event_available</mat-icon>
+              <input matInput #anoModelo type="number" min="1900" max="2100" placeholder="2025" />
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" subscriptSizing="dynamic">
+              <mat-label>Placa</mat-label>
+              <mat-icon matPrefix>pin</mat-icon>
+              <input matInput #placa maxlength="8" autocapitalize="characters" placeholder="ABC1D23" />
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" subscriptSizing="dynamic">
+              <mat-label>RENAVAM</mat-label>
+              <mat-icon matPrefix>receipt_long</mat-icon>
+              <input matInput #renavam maxlength="11" inputmode="numeric" placeholder="00000000000" />
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" subscriptSizing="dynamic" class="field-wide">
+              <mat-label>Observações</mat-label>
+              <mat-icon matPrefix>edit_note</mat-icon>
+              <textarea
+                matInput
+                #observacoes
+                rows="3"
+                placeholder="Estado de conservação, opcionais ou detalhes da proposta"
+              ></textarea>
+            </mat-form-field>
+          </div>
+        </div>
+      </article>
+
+      <aside class="surface calculator-card">
+        <div class="section-heading">
+          <span class="step-number" aria-hidden="true">2</span>
+          <div>
+            <span class="section-kicker">Planejamento</span>
+            <h2>Monte sua simulação</h2>
+            <p>Ajuste os valores para entender o custo antes de negociar.</p>
+          </div>
+        </div>
+
+        <div class="field-grid finance-grid">
+          <mat-form-field appearance="outline" subscriptSizing="dynamic" class="field-wide">
+            <mat-label>Valor do veículo</mat-label>
+            <input
+              matInput
+              type="text"
+              #valorTotal
+              [value]="valorFIPE"
+              inputmode="numeric"
+              autocomplete="off"
+              placeholder="R$ 0,00"
+              (input)="onCurrencyInput($event)"
+            />
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" subscriptSizing="dynamic">
+            <mat-label>Entrada</mat-label>
+            <input
+              matInput
+              type="text"
+              #entrada
+              inputmode="numeric"
+              autocomplete="off"
+              placeholder="R$ 0,00"
+              (input)="onCurrencyInput($event)"
+            />
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" subscriptSizing="dynamic">
+            <mat-label>Parcela final / residual</mat-label>
+            <input
+              matInput
+              type="text"
+              #parcelaResidual
+              inputmode="numeric"
+              autocomplete="off"
+              placeholder="R$ 0,00"
+              (input)="onCurrencyInput($event)"
+            />
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" subscriptSizing="dynamic">
+            <mat-label>Número de parcelas</mat-label>
+            <mat-icon matPrefix>calendar_month</mat-icon>
+            <input matInput #numParcelas type="number" min="1" max="100" step="1" value="36" />
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" subscriptSizing="dynamic">
+            <mat-label>Taxa ao mês</mat-label>
+            <mat-icon matPrefix>percent</mat-icon>
+            <input matInput #taxaJuros type="number" min="0" step="0.01" inputmode="decimal" placeholder="1,49" />
+            <span matTextSuffix>% a.m.</span>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" subscriptSizing="dynamic" class="field-wide">
+            <mat-label>Parcela alvo (opcional)</mat-label>
+            <input
+              matInput
+              #parcelaAlvo
+              type="text"
+              inputmode="numeric"
+              autocomplete="off"
+              placeholder="Quanto cabe no seu orçamento?"
+              (input)="onCurrencyInput($event)"
+            />
+            <mat-hint>Sem a taxa? Informe a parcela para estimá-la.</mat-hint>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" subscriptSizing="dynamic" class="field-wide bank-field">
+            <mat-label>Banco ou instituição (opcional)</mat-label>
+            <mat-icon matPrefix>account_balance</mat-icon>
+            <mat-select
+              [formControl]="bancoControl"
+              (selectionChange)="selecionarTaxaJuros($event.value)"
+            >
+              <mat-option value="">Usar taxa informada manualmente</mat-option>
+              <mat-option *ngFor="let taxa of taxasJuros" [value]="taxa.Posicao.toString()">
+                {{ taxa.InstituicaoFinanceira }} — {{ taxa.TaxaJurosAoMes }}% a.m.
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <div class="rates-status" aria-live="polite">
+          <span *ngIf="carregandoTaxas">
+            <span class="spinner" aria-hidden="true"></span>
+            Buscando taxas do Banco Central…
+          </span>
+          <span *ngIf="!carregandoTaxas && taxasJuros.length">
+            <mat-icon aria-hidden="true">database</mat-icon>
+            Taxas recentes disponíveis para comparação
+          </span>
+          <span class="error" *ngIf="!carregandoTaxas && erroTaxas">
+            <mat-icon aria-hidden="true">info</mat-icon>
+            {{ erroTaxas }}
+          </span>
+        </div>
+
+        <div class="calculator-actions">
+          <button type="button" mat-flat-button class="calculate-button" (click)="calcular()">
+            Calcular financiamento
+            <mat-icon iconPositionEnd>arrow_forward</mat-icon>
+          </button>
+          <button type="button" mat-button class="clear-button" (click)="limparTela()">
+            <mat-icon>refresh</mat-icon>
+            Limpar
+          </button>
+        </div>
+
+        <div class="inline-status error" *ngIf="mensagemErro" role="alert">
+          <mat-icon aria-hidden="true">error_outline</mat-icon>
+          {{ mensagemErro }}
+        </div>
+
+        <section class="calculation-result" *ngIf="resultadoCalculo" aria-live="polite">
+          <div class="result-hero">
+            <span>Parcela mensal estimada</span>
+            <strong>{{ resultadoCalculo.parcelaMensal | currency:'BRL':'symbol':'1.2-2' }}</strong>
+            <small>
+              {{ resultadoCalculo.numParcelas }} parcelas a
+              {{ resultadoCalculo.taxaMensal | number:'1.2-4' }}% ao mês
+            </small>
+          </div>
+
+          <div class="result-metrics">
+            <div>
+              <span>Valor financiado</span>
+              <strong>{{ resultadoCalculo.valorFinanciado | currency:'BRL':'symbol':'1.2-2' }}</strong>
             </div>
-    
-            <!-- Card 2: Calculadora de Financiamento -->
-            <div class="custom-card">
-                <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; cursor: pointer;" >
-                    <div class="card-title col-12" (click)="toggleCardCalculadora()">
-                        <span class="material-icons" style="font-size:2.2rem;color:#3973e7;">calculate</span>
-                        Calculadora de Financiamento
-                    </div>                
-                </div>
-                <div [hidden]="cardCalculadoraCollapsed">
-                    <div class="card-subtitle">
-                        Calcule o valor das parcelas, juros pagos e total ao final do financiamento.
-                    </div>
-                    <div class="card-content" *ngIf="!cardCalculadoraCollapsed">
-                        <mat-form-field class="col-12">
-                            <mat-label>Amount</mat-label>
-                            <span matPrefix class="material-icons" style="color:#3973e7; margin-right:8px;">attach_money</span>
-                            <input matInput type="text" #valorTotal [value]="valorFIPE" placeholder="R$ 0,00"
-                                (input)="onInput($event)">
-                        </mat-form-field>
-                    </div>
-                    <div>
-                        <mat-form-field class="col-12">
-                            <mat-label>Entrada (opcional)</mat-label>
-                            <span matPrefix class="material-icons" style="color:#3973e7; margin-right:8px;">attach_money</span>
-                            <input matInput type="text" #entrada placeholder="R$ 0,00" (input)="onInput($event)">
-                        </mat-form-field>
-                    </div>
-                    <div>
-                        <mat-form-field class="col-12">
-                            <mat-label>Parcela Residual (opcional)</mat-label>
-                            <span matPrefix class="material-icons" style="color:#3973e7; margin-right:8px;">attach_money</span>
-                            <input matInput type="text" #parcelaResidual placeholder="R$ 0,00" (input)="onInput($event)">
-                        </mat-form-field>
-                    </div>
-                    <div>
-                        <mat-form-field class="col-12">
-                            <mat-label>Nº Parcelas</mat-label>
-                            <span matPrefix class="material-icons"
-                                style="color:#3973e7; margin-right:8px;">calendar_today</span>
-                            <input matInput #numParcelas type="number" maxlength="2" min="1" max="100" placeholder="Ex. 36"
-                                step="1" value="36">
-                        </mat-form-field>
-                    </div>
-                    <div>
-                        <mat-form-field class="col-12">
-                            <mat-label>Banco/Instituição Financeira</mat-label>
-                            <span matPrefix class="material-icons"
-                                style="color:#3973e7; margin-right:8px;">account_balance</span>
-                            <mat-select [formControl]="bancoControl" (selectionChange)='selecionarTaxaJuros($event.value)' placeholder="Selecione um banco">
-                                <mat-option *ngFor="let taxa of taxasJuros" [value]="taxa.Posicao.toString()">
-                                    {{taxa.InstituicaoFinanceira}} - {{taxa.TaxaJurosAoMes}}% ao mês ({{taxa.TaxaJurosAoAno}}%
-                                    ao ano)
-                                </mat-option>
-                            </mat-select>
-                        </mat-form-field>
-                        <div *ngIf="carregandoTaxas" class="text-center">
-                            <small>Carregando taxas de juros...</small>
-                        </div>
-                        <div *ngIf="taxasJuros.length > 0 && !carregandoTaxas" class="text-center">
-                            <small>Taxas atualizadas em: {{dataTaxasJuros || 'Data mais recente disponível'}} </small>
-                        </div>
-                    </div>
-                    <div>
-                        <mat-form-field class="col-12">
-                            <mat-label>Taxa de Juros/Financiamento</mat-label>
-                            <span matPrefix class="material-icons" style="color:#3973e7; margin-right:8px;">show_chart</span>
-                            <input matInput #taxaJuros type="number" placeholder="0.7" min="0" (change)="clearParcelaIdeal()">
-                        </mat-form-field>
-                    </div>
-                    <div class="text-center">
-                        <button mat-raised-button class="button-primary" (click)="calcular()">Calcular financiamento</button>
-                    </div>
-                    <div class="mt-3">
-                        <mat-form-field class="col-12">
-                            <mat-label>Parcela Ideal</mat-label>
-                            <span matPrefix class="material-icons" style="color:#3973e7; margin-right:8px;">attach_money</span>
-                            <input matInput type="text" #parcelaTotal placeholder="R$ 0,00" (input)="onInput($event)">
-                        </mat-form-field>
-                    </div>
-                </div>
+            <div>
+              <span>Juros nas parcelas</span>
+              <strong>{{ resultadoCalculo.totalJuros | currency:'BRL':'symbol':'1.2-2' }}</strong>
             </div>
-    </div>
+            <div>
+              <span>Total desembolsado</span>
+              <strong>{{ resultadoCalculo.totalPago | currency:'BRL':'symbol':'1.2-2' }}</strong>
+            </div>
+          </div>
+
+          <p class="result-disclaimer">
+            <mat-icon aria-hidden="true">info</mat-icon>
+            Estimativa pelo sistema Price. A proposta real pode incluir CET, seguros, tarifas e impostos.
+          </p>
+        </section>
+      </aside>
+    </section>
+
+    <section class="privacy-note">
+      <mat-icon aria-hidden="true">lock</mat-icon>
+      <div>
+        <strong>Seus dados ficam neste dispositivo</strong>
+        <span>O histórico é salvo apenas no seu navegador e pode ser apagado a qualquer momento.</span>
+      </div>
+    </section>
+  </main>
 </div>
 
-<!-- Botão para mostrar/ocultar histórico -->
-<div class="row mt-4">
-    <div class="col-12 text-center">
-        <div style="display: flex; justify-content: center; align-items: center; gap: 10px; margin-bottom: 20px;">
-            <button mat-raised-button 
-                    class="button-secondary" 
-                    (click)="alternarHistorico()">
-                <span class="material-icons" style="margin-right: 8px;">history</span>
-                {{ mostrarHistorico ? 'Ocultar' : 'Mostrar' }} Histórico de Simulações
-            </button>
-            <button mat-icon-button 
-                    class="button-secondary" 
-                    (click)="limparTela()"
-                    style="display: flex; align-items: center; justify-content: center;"
-                    title="Limpar tela">
-                <span class="material-icons" style="font-size: 20px;">cleaning_services</span>
-            </button>
-        </div>
+<div
+  id="historico-dialog"
+  class="history-overlay"
+  *ngIf="mostrarHistorico"
+  (click)="onHistoricoClick($event)"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="historico-title"
+>
+  <section class="history-dialog">
+    <header class="history-header">
+      <div>
+        <span class="section-kicker">Salvo neste navegador</span>
+        <h2 id="historico-title">Histórico de simulações</h2>
+        <p>Retome uma proposta anterior ou compare cenários.</p>
+      </div>
+      <button type="button" mat-icon-button class="close-button" (click)="fecharHistorico()" aria-label="Fechar histórico">
+        <mat-icon>close</mat-icon>
+      </button>
+    </header>
+
+    <p class="mobile-scroll-hint" *ngIf="simulacoesHistorico.length">
+      <mat-icon aria-hidden="true">swipe</mat-icon>
+      Deslize a tabela para ver todos os detalhes
+    </p>
+
+    <div *ngIf="simulacoesHistorico.length === 0" class="empty-state">
+      <span class="empty-icon"><mat-icon>history</mat-icon></span>
+      <h3>Nenhuma simulação por aqui</h3>
+      <p>Depois de calcular um financiamento, ele aparecerá automaticamente neste histórico.</p>
+      <button type="button" mat-flat-button class="calculate-button" (click)="fecharHistorico()">
+        Fazer uma simulação
+      </button>
     </div>
-</div>
 
-<!-- Tabela de histórico -->
-<div class="historico-container" *ngIf="mostrarHistorico" (click)="onHistoricoClick($event)">
-    <div class="historico-wrapper">
-        <div class="custom-card historico-card">
-            <div class="card-header">
-                <div class="card-title">
-                    <span class="material-icons" style="font-size:2.2rem;color:#3973e7;">history</span>
-                    Histórico
-                </div>
-                <button mat-icon-button 
-                        class="fechar-btn" 
-                        (click)="fecharHistorico()"
-                        title="Fechar">
-                    <span class="material-icons">close</span>
-                </button>
+    <div *ngIf="simulacoesHistorico.length > 0" class="history-table-wrapper">
+      <table mat-table [dataSource]="simulacoesHistorico" class="history-table">
+        <ng-container matColumnDef="data">
+          <th mat-header-cell *matHeaderCellDef>Data</th>
+          <td mat-cell *matCellDef="let simulacao">{{ formatarData(simulacao.data) }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="carro">
+          <th mat-header-cell *matHeaderCellDef>Veículo</th>
+          <td mat-cell *matCellDef="let simulacao">
+            <div class="car-summary">
+              <strong>{{ formatarInfoCarro(simulacao) }}</strong>
+              <small *ngIf="simulacao.nomeLoja || simulacao.situacaoCarro">
+                {{ simulacao.nomeLoja || simulacao.situacaoCarro }}
+              </small>
             </div>
-            <div class="card-subtitle">
-                Suas simulações salvas automaticamente
-            </div>
-            
-            <div *ngIf="simulacoesHistorico.length === 0" class="text-center" style="padding: 20px;">
-                <span class="material-icons" style="font-size: 3rem; color: #ccc;">history</span>
-                <p>Nenhuma simulação encontrada no histórico.</p>
-                <p>Faça uma simulação para que ela apareça aqui automaticamente.</p>
-            </div>
+          </td>
+        </ng-container>
 
-            <div *ngIf="simulacoesHistorico.length > 0">
-                <table mat-table [dataSource]="simulacoesHistorico" class="historico-table">
-                    <!-- Data -->
-                    <ng-container matColumnDef="data">
-                        <th mat-header-cell *matHeaderCellDef>Data</th>
-                        <td mat-cell *matCellDef="let simulacao">{{ formatarData(simulacao.data) }}</td>
-                    </ng-container>
+        <ng-container matColumnDef="valorTotal">
+          <th mat-header-cell *matHeaderCellDef>Valor</th>
+          <td mat-cell *matCellDef="let simulacao">{{ simulacao.valorTotal }}</td>
+        </ng-container>
 
-                    <!-- Carro -->
-                    <ng-container matColumnDef="carro">
-                        <th mat-header-cell *matHeaderCellDef>Carro</th>
-                        <td mat-cell *matCellDef="let simulacao">
-                            <div class="carro-info">
-                                <div class="carro-principal">{{ formatarInfoCarro(simulacao) }}</div>
-                                <div class="carro-detalhes" *ngIf="simulacao.nomeLoja || simulacao.situacaoCarro">
-                                    <small>
-                                        <span *ngIf="simulacao.nomeLoja">{{ simulacao.nomeLoja }}</span>
-                                        <span *ngIf="simulacao.nomeLoja && simulacao.situacaoCarro"> • </span>
-                                        <span *ngIf="simulacao.situacaoCarro">{{ simulacao.situacaoCarro }}</span>
-                                    </small>
-                                </div>
-                            </div>
-                        </td>
-                    </ng-container>
+        <ng-container matColumnDef="parcelaTotal">
+          <th mat-header-cell *matHeaderCellDef>Parcela</th>
+          <td mat-cell *matCellDef="let simulacao"><strong>{{ simulacao.parcelaTotal }}</strong></td>
+        </ng-container>
 
-                    <!-- Valor Total -->
-                    <ng-container matColumnDef="valorTotal">
-                        <th mat-header-cell *matHeaderCellDef>Valor Total</th>
-                        <td mat-cell *matCellDef="let simulacao">{{ simulacao.valorTotal }}</td>
-                    </ng-container>
+        <ng-container matColumnDef="numParcelas">
+          <th mat-header-cell *matHeaderCellDef>Prazo</th>
+          <td mat-cell *matCellDef="let simulacao">{{ simulacao.numParcelas }}x</td>
+        </ng-container>
 
-                    <!-- Parcela Total -->
-                    <ng-container matColumnDef="parcelaTotal">
-                        <th mat-header-cell *matHeaderCellDef>Parcela</th>
-                        <td mat-cell *matCellDef="let simulacao">{{ simulacao.parcelaTotal }}</td>
-                    </ng-container>
+        <ng-container matColumnDef="taxaJuros">
+          <th mat-header-cell *matHeaderCellDef>Taxa</th>
+          <td mat-cell *matCellDef="let simulacao">{{ simulacao.taxaJuros | number:'1.2-4' }}%</td>
+        </ng-container>
 
-                    <!-- Número de Parcelas -->
-                    <ng-container matColumnDef="numParcelas">
-                        <th mat-header-cell *matHeaderCellDef>Parcelas</th>
-                        <td mat-cell *matCellDef="let simulacao">{{ simulacao.numParcelas }}x</td>
-                    </ng-container>
+        <ng-container matColumnDef="banco">
+          <th mat-header-cell *matHeaderCellDef>Instituição</th>
+          <td mat-cell *matCellDef="let simulacao">{{ simulacao.instituicaoFinanceira || '—' }}</td>
+        </ng-container>
 
-                    <!-- Taxa de Juros -->
-                    <ng-container matColumnDef="taxaJuros">
-                        <th mat-header-cell *matHeaderCellDef>Taxa</th>
-                        <td mat-cell *matCellDef="let simulacao">{{ simulacao.taxaJuros }}%</td>
-                    </ng-container>
+        <ng-container matColumnDef="acoes">
+          <th mat-header-cell *matHeaderCellDef><span class="visually-hidden">Ações</span></th>
+          <td mat-cell *matCellDef="let simulacao" class="row-actions">
+            <button type="button" mat-icon-button (click)="carregarSimulacao(simulacao)" aria-label="Carregar simulação">
+              <mat-icon>north_west</mat-icon>
+            </button>
+            <button type="button" mat-icon-button class="delete-button" (click)="deletarSimulacao(simulacao.id)" aria-label="Excluir simulação">
+              <mat-icon>delete_outline</mat-icon>
+            </button>
+          </td>
+        </ng-container>
 
-                    <!-- Banco -->
-                    <ng-container matColumnDef="banco">
-                        <th mat-header-cell *matHeaderCellDef>Banco</th>
-                        <td mat-cell *matCellDef="let simulacao">
-                            <span *ngIf="simulacao.instituicaoFinanceira">{{ simulacao.instituicaoFinanceira }}</span>
-                            <span *ngIf="!simulacao.instituicaoFinanceira" style="color: #ccc;">-</span>
-                        </td>
-                    </ng-container>
-
-                    <!-- Ações -->
-                    <ng-container matColumnDef="acoes">
-                        <th mat-header-cell *matHeaderCellDef>Ações</th>
-                        <td mat-cell *matCellDef="let simulacao">
-                            <button mat-icon-button 
-                                    color="primary" 
-                                    (click)="carregarSimulacao(simulacao)"
-                                    title="Carregar simulação">
-                                <span class="material-icons">visibility</span>
-                            </button>
-                            <button mat-icon-button 
-                                    color="warn" 
-                                    (click)="deletarSimulacao(simulacao.id)"
-                                    title="Deletar simulação">
-                                <span class="material-icons">delete</span>
-                            </button>
-                        </td>
-                    </ng-container>
-
-                    <tr mat-header-row *matHeaderRowDef="colunasHistorico"></tr>
-                    <tr mat-row *matRowDef="let row; columns: colunasHistorico;"></tr>
-                </table>
-            </div>
-        </div>
+        <tr mat-header-row *matHeaderRowDef="colunasHistorico"></tr>
+        <tr mat-row *matRowDef="let row; columns: colunasHistorico"></tr>
+      </table>
     </div>
+  </section>
 </div>
