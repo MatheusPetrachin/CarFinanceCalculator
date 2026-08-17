@@ -1,5 +1,5 @@
-import { CommonModule, CurrencyPipe } from '@angular/common';
-import { Component, ElementRef, HostListener, OnInit, ViewChild } from '@angular/core';
+import { CommonModule, CurrencyPipe, isPlatformBrowser } from '@angular/common';
+import { Component, ElementRef, HostListener, Inject, OnInit, PLATFORM_ID, ViewChild } from '@angular/core';
 import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -100,12 +100,15 @@ export class AppComponent implements OnInit {
 
   constructor(
     private readonly appService: AppService,
-    private readonly currencyPipe: CurrencyPipe
+    private readonly currencyPipe: CurrencyPipe,
+    @Inject(PLATFORM_ID) private readonly platformId: object
   ) {}
 
   ngOnInit(): void {
-    this.getTaxasJuros();
-    this.carregarHistorico();
+    if (isPlatformBrowser(this.platformId)) {
+      this.getTaxasJuros();
+      this.carregarHistorico();
+    }
   }
 
   onCurrencyInput(event: Event): void {

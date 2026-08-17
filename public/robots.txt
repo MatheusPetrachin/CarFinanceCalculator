@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://car-finance-calculator-silk.vercel.app/sitemap.xml
