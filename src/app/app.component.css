@@ -587,6 +587,79 @@ mat-form-field mat-icon[matPrefix] {
   color: var(--ink-700);
 }
 
+.seo-guide {
+  margin-top: 58px;
+  padding: 40px;
+  border: 1px solid var(--line-200);
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.seo-guide-heading {
+  max-width: 760px;
+}
+
+.seo-guide .section-kicker {
+  color: var(--brand-600);
+}
+
+.seo-guide h2 {
+  margin: 9px 0 12px;
+  color: var(--ink-900);
+  font-size: clamp(1.6rem, 3vw, 2.2rem);
+  line-height: 1.15;
+  letter-spacing: -0.035em;
+}
+
+.seo-guide-heading > p {
+  margin: 0;
+  color: var(--ink-500);
+  line-height: 1.65;
+}
+
+.seo-guide-grid {
+  margin-top: 30px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.seo-guide-grid article {
+  padding: 22px;
+  border: 1px solid var(--line-200);
+  border-radius: 18px;
+  background: #fff;
+}
+
+.guide-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  color: var(--brand-600);
+  background: #eff6ff;
+}
+
+.guide-icon mat-icon {
+  width: 21px;
+  height: 21px;
+  font-size: 21px;
+}
+
+.seo-guide-grid h3 {
+  margin: 18px 0 9px;
+  color: var(--ink-800);
+  font-size: 1rem;
+}
+
+.seo-guide-grid p {
+  margin: 0;
+  color: var(--ink-500);
+  font-size: 0.84rem;
+  line-height: 1.65;
+}
+
 .history-overlay {
   position: fixed;
   inset: 0;
@@ -755,6 +828,10 @@ mat-form-field mat-icon[matPrefix] {
   .calculator-card {
     position: static;
   }
+
+  .seo-guide-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 700px) {
@@ -798,6 +875,12 @@ mat-form-field mat-icon[matPrefix] {
 
   .surface {
     padding: 24px 18px;
+    border-radius: 20px;
+  }
+
+  .seo-guide {
+    margin-top: 42px;
+    padding: 26px 18px;
     border-radius: 20px;
   }
 

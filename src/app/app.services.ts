@@ -1,4 +1,5 @@
-import { Injectable } from "@angular/core";
+import { isPlatformBrowser } from '@angular/common';
+import { Inject, Injectable, PLATFORM_ID } from '@angular/core';
 import { environment } from "../environments/environment";
 import { HttpClient } from '@angular/common/http';
 import { Marca, ModeloAno, Modelo, ResultadoFipe, TaxaJuros, ResultadoTaxaJuros, PeriodosDisponiveis, SimulacaoHistorico } from "./app.model";
@@ -15,7 +16,10 @@ export class AppService {
     APIBCBUrl: string = environment.apiBCBUrl;
     APIBCBPeriodosUrl: string = environment.apiBCBPeriodosUrl;
 
-    constructor(private http: HttpClient) { }
+    constructor(
+        private readonly http: HttpClient,
+        @Inject(PLATFORM_ID) private readonly platformId: object
+    ) { }
 
     getMarcas(codigoVeiculo: string): Observable<Marca[]> {
         return this.http.get<Marca[]>(`${this.APIFipeUrl}${codigoVeiculo}/marcas`);
@@ -66,6 +70,10 @@ export class AppService {
     private readonly STORAGE_KEY = 'simulacoes_historico';
 
     salvarSimulacao(simulacao: Omit<SimulacaoHistorico, 'id' | 'data'>): void {
+        if (!isPlatformBrowser(this.platformId)) {
+            return;
+        }
+
         const simulacoes = this.obterSimulacoes();
         const novaSimulacao: SimulacaoHistorico = {
             ...simulacao,
@@ -78,18 +86,37 @@ export class AppService {
     }
 
     obterSimulacoes(): SimulacaoHistorico[] {
+        if (!isPlatformBrowser(this.platformId)) {
+            return [];
+        }
+
         const dados = localStorage.getItem(this.STORAGE_KEY);
-        return dados ? JSON.parse(dados) : [];
+        if (!dados) {
+            return [];
+        }
+
+        try {
+            return JSON.parse(dados);
+        } catch {
+            localStorage.removeItem(this.STORAGE_KEY);
+            return [];
+        }
     }
 
     deletarSimulacao(id: string): void {
+        if (!isPlatformBrowser(this.platformId)) {
+            return;
+        }
+
         const simulacoes = this.obterSimulacoes();
         const simulacoesFiltradas = simulacoes.filter(s => s.id !== id);
         localStorage.setItem(this.STORAGE_KEY, JSON.stringify(simulacoesFiltradas));
     }
 
     limparHistorico(): void {
-        localStorage.removeItem(this.STORAGE_KEY);
+        if (isPlatformBrowser(this.platformId)) {
+            localStorage.removeItem(this.STORAGE_KEY);
+        }
     }
 
     private gerarId(): string {
