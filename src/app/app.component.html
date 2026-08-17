@@ -477,22 +477,20 @@
   aria-modal="true"
   aria-labelledby="historico-title"
 >
-  <section class="history-dialog">
+  <aside class="history-drawer">
     <header class="history-header">
+      <span class="history-header-icon" aria-hidden="true">
+        <mat-icon>compare_arrows</mat-icon>
+      </span>
       <div>
         <span class="section-kicker">Salvo neste navegador</span>
-        <h2 id="historico-title">Histórico de simulações</h2>
-        <p>Retome uma proposta anterior ou compare cenários.</p>
+        <h2 id="historico-title">Compare suas simulações</h2>
+        <p>Selecione até três cenários e veja as diferenças de forma simples.</p>
       </div>
       <button type="button" mat-icon-button class="close-button" (click)="fecharHistorico()" aria-label="Fechar histórico">
         <mat-icon>close</mat-icon>
       </button>
     </header>
-
-    <p class="mobile-scroll-hint" *ngIf="simulacoesHistorico.length">
-      <mat-icon aria-hidden="true">swipe</mat-icon>
-      Deslize a tabela para ver todos os detalhes
-    </p>
 
     <div *ngIf="simulacoesHistorico.length === 0" class="empty-state">
       <span class="empty-icon"><mat-icon>history</mat-icon></span>
@@ -503,65 +501,216 @@
       </button>
     </div>
 
-    <div *ngIf="simulacoesHistorico.length > 0" class="history-table-wrapper">
-      <table mat-table [dataSource]="simulacoesHistorico" class="history-table">
-        <ng-container matColumnDef="data">
-          <th mat-header-cell *matHeaderCellDef>Data</th>
-          <td mat-cell *matCellDef="let simulacao">{{ formatarData(simulacao.data) }}</td>
-        </ng-container>
+    <div *ngIf="simulacoesHistorico.length > 0" class="history-drawer-content">
+      <section class="history-list-pane" aria-labelledby="saved-simulations-title">
+        <header class="history-pane-header">
+          <div>
+            <h3 id="saved-simulations-title">Simulações salvas</h3>
+            <p>Toque em “Comparar” para montar sua análise.</p>
+          </div>
+          <span class="selection-counter" aria-live="polite">
+            {{ idsComparacao.length }}/{{ maximoComparacoes }}
+          </span>
+        </header>
 
-        <ng-container matColumnDef="carro">
-          <th mat-header-cell *matHeaderCellDef>Veículo</th>
-          <td mat-cell *matCellDef="let simulacao">
-            <div class="car-summary">
-              <strong>{{ formatarInfoCarro(simulacao) }}</strong>
-              <small *ngIf="simulacao.nomeLoja || simulacao.situacaoCarro">
-                {{ simulacao.nomeLoja || simulacao.situacaoCarro }}
-              </small>
+        <div class="history-card-list">
+          <article
+            class="history-card"
+            *ngFor="let simulacao of simulacoesHistorico"
+            [class.is-selected]="estaNaComparacao(simulacao.id)"
+          >
+            <div class="history-card-topline">
+              <button
+                type="button"
+                class="compare-toggle"
+                (click)="alternarComparacao(simulacao.id)"
+                [class.is-selected]="estaNaComparacao(simulacao.id)"
+                [disabled]="idsComparacao.length >= maximoComparacoes && !estaNaComparacao(simulacao.id)"
+                [attr.aria-pressed]="estaNaComparacao(simulacao.id)"
+              >
+                <span *ngIf="estaNaComparacao(simulacao.id)" class="comparison-index">
+                  {{ indiceComparacao(simulacao.id) }}
+                </span>
+                <mat-icon *ngIf="!estaNaComparacao(simulacao.id)" aria-hidden="true">add_circle_outline</mat-icon>
+                {{ estaNaComparacao(simulacao.id) ? 'Comparando' : 'Comparar' }}
+              </button>
+              <time [attr.datetime]="simulacao.data">{{ formatarData(simulacao.data) }}</time>
             </div>
-          </td>
-        </ng-container>
 
-        <ng-container matColumnDef="valorTotal">
-          <th mat-header-cell *matHeaderCellDef>Valor</th>
-          <td mat-cell *matCellDef="let simulacao">{{ simulacao.valorTotal }}</td>
-        </ng-container>
+            <div class="history-vehicle">
+              <span class="history-vehicle-icon" aria-hidden="true">
+                <mat-icon>{{ simulacao.codigoVeiculo === 'motos' ? 'two_wheeler' : 'directions_car' }}</mat-icon>
+              </span>
+              <div>
+                <h4>{{ formatarInfoCarro(simulacao) }}</h4>
+                <p>
+                  {{ simulacao.instituicaoFinanceira || simulacao.nomeLoja || simulacao.situacaoCarro || 'Taxa informada manualmente' }}
+                </p>
+              </div>
+            </div>
 
-        <ng-container matColumnDef="parcelaTotal">
-          <th mat-header-cell *matHeaderCellDef>Parcela</th>
-          <td mat-cell *matCellDef="let simulacao"><strong>{{ simulacao.parcelaTotal }}</strong></td>
-        </ng-container>
+            <div class="history-card-values">
+              <div>
+                <span>Valor do veículo</span>
+                <strong>{{ simulacao.valorTotal }}</strong>
+              </div>
+              <div>
+                <span>Parcela estimada</span>
+                <strong>{{ simulacao.parcelaTotal }}</strong>
+              </div>
+            </div>
 
-        <ng-container matColumnDef="numParcelas">
-          <th mat-header-cell *matHeaderCellDef>Prazo</th>
-          <td mat-cell *matCellDef="let simulacao">{{ simulacao.numParcelas }}x</td>
-        </ng-container>
+            <div class="history-card-details">
+              <span><mat-icon aria-hidden="true">savings</mat-icon> Entrada {{ simulacao.entrada }} ({{ percentualEntrada(simulacao) }}%)</span>
+              <span><mat-icon aria-hidden="true">calendar_month</mat-icon> {{ simulacao.numParcelas }}x a {{ simulacao.taxaJuros | number:'1.2-4' }}% a.m.</span>
+            </div>
 
-        <ng-container matColumnDef="taxaJuros">
-          <th mat-header-cell *matHeaderCellDef>Taxa</th>
-          <td mat-cell *matCellDef="let simulacao">{{ simulacao.taxaJuros | number:'1.2-4' }}%</td>
-        </ng-container>
+            <div class="history-card-actions">
+              <button type="button" mat-stroked-button class="history-load-button" (click)="carregarSimulacao(simulacao)">
+                Usar este cenário
+                <mat-icon iconPositionEnd>north_west</mat-icon>
+              </button>
+              <button
+                type="button"
+                mat-icon-button
+                class="delete-button"
+                (click)="deletarSimulacao(simulacao.id)"
+                [attr.aria-label]="'Excluir ' + formatarInfoCarro(simulacao)"
+              >
+                <mat-icon>delete_outline</mat-icon>
+              </button>
+            </div>
+          </article>
+        </div>
+      </section>
 
-        <ng-container matColumnDef="banco">
-          <th mat-header-cell *matHeaderCellDef>Instituição</th>
-          <td mat-cell *matCellDef="let simulacao">{{ simulacao.instituicaoFinanceira || '—' }}</td>
-        </ng-container>
+      <section class="comparison-pane" aria-labelledby="comparison-title">
+        <header class="comparison-header">
+          <div>
+            <span class="section-kicker">Visão lado a lado</span>
+            <h3 id="comparison-title">Comparação</h3>
+            <p *ngIf="idsComparacao.length">
+              {{ idsComparacao.length }} {{ idsComparacao.length === 1 ? 'cenário selecionado' : 'cenários selecionados' }}
+            </p>
+          </div>
+          <button type="button" mat-button class="clear-comparison" *ngIf="idsComparacao.length" (click)="limparComparacao()">
+            <mat-icon>restart_alt</mat-icon>
+            Limpar
+          </button>
+        </header>
 
-        <ng-container matColumnDef="acoes">
-          <th mat-header-cell *matHeaderCellDef><span class="visually-hidden">Ações</span></th>
-          <td mat-cell *matCellDef="let simulacao" class="row-actions">
-            <button type="button" mat-icon-button (click)="carregarSimulacao(simulacao)" aria-label="Carregar simulação">
-              <mat-icon>north_west</mat-icon>
-            </button>
-            <button type="button" mat-icon-button class="delete-button" (click)="deletarSimulacao(simulacao.id)" aria-label="Excluir simulação">
-              <mat-icon>delete_outline</mat-icon>
-            </button>
-          </td>
-        </ng-container>
+        <div class="comparison-empty" *ngIf="idsComparacao.length === 0">
+          <span><mat-icon>compare_arrows</mat-icon></span>
+          <h4>Escolha o que deseja comparar</h4>
+          <p>Selecione de dois a três cartões ao lado para destacar as melhores condições.</p>
+        </div>
 
-        <tr mat-header-row *matHeaderRowDef="colunasHistorico"></tr>
-        <tr mat-row *matRowDef="let row; columns: colunasHistorico"></tr>
-      </table>
+        <div *ngIf="idsComparacao.length > 0" class="comparison-content">
+          <div class="comparison-insights" *ngIf="idsComparacao.length > 1">
+            <article *ngIf="obterMelhorSimulacao('parcela') as menorParcela">
+              <mat-icon aria-hidden="true">payments</mat-icon>
+              <div>
+                <span>Menor parcela</span>
+                <strong>{{ menorParcela.parcelaTotal }}</strong>
+                <small>{{ formatarInfoCarro(menorParcela) }}</small>
+              </div>
+            </article>
+            <article *ngIf="obterMelhorSimulacao('juros') as menosJuros">
+              <mat-icon aria-hidden="true">percent</mat-icon>
+              <div>
+                <span>Menos juros</span>
+                <strong>{{ formatarValor(menosJuros.totalJuros) }}</strong>
+                <small>{{ formatarInfoCarro(menosJuros) }}</small>
+              </div>
+            </article>
+            <article *ngIf="obterMelhorSimulacao('total') as menorTotal">
+              <mat-icon aria-hidden="true">verified</mat-icon>
+              <div>
+                <span>Menor custo total</span>
+                <strong>{{ formatarValor(menorTotal.totalPago) }}</strong>
+                <small>{{ formatarInfoCarro(menorTotal) }}</small>
+              </div>
+            </article>
+          </div>
+
+          <p class="comparison-swipe-hint" *ngIf="idsComparacao.length > 1">
+            <mat-icon aria-hidden="true">swipe</mat-icon>
+            Deslize para comparar todos os cenários
+          </p>
+
+          <div class="comparison-grid">
+            <article
+              class="comparison-card"
+              *ngFor="let simulacao of simulacoesComparacao; let indice = index"
+              [attr.data-color]="indice"
+            >
+              <header>
+                <span class="scenario-label">Cenário {{ indice + 1 }}</span>
+                <button
+                  type="button"
+                  mat-icon-button
+                  (click)="removerDaComparacao(simulacao.id)"
+                  [attr.aria-label]="'Remover ' + formatarInfoCarro(simulacao) + ' da comparação'"
+                >
+                  <mat-icon>close</mat-icon>
+                </button>
+              </header>
+
+              <div class="comparison-vehicle">
+                <span aria-hidden="true"><mat-icon>{{ simulacao.codigoVeiculo === 'motos' ? 'two_wheeler' : 'directions_car' }}</mat-icon></span>
+                <div>
+                  <h4>{{ formatarInfoCarro(simulacao) }}</h4>
+                  <p>{{ simulacao.instituicaoFinanceira || simulacao.nomeLoja || 'Simulação manual' }}</p>
+                </div>
+              </div>
+
+              <dl class="comparison-metrics">
+                <div>
+                  <dt>Valor do veículo</dt>
+                  <dd>{{ simulacao.valorTotal }}</dd>
+                </div>
+                <div>
+                  <dt>Entrada</dt>
+                  <dd>{{ simulacao.entrada }} <small>{{ percentualEntrada(simulacao) }}%</small></dd>
+                </div>
+                <div class="featured" [class.best-value]="ehMelhorOpcao(simulacao, 'parcela')">
+                  <dt>Parcela mensal</dt>
+                  <dd>{{ simulacao.parcelaTotal }}</dd>
+                  <span *ngIf="ehMelhorOpcao(simulacao, 'parcela')">Melhor valor</span>
+                </div>
+                <div>
+                  <dt>Prazo e taxa</dt>
+                  <dd>{{ simulacao.numParcelas }}x <small>{{ simulacao.taxaJuros | number:'1.2-4' }}% a.m.</small></dd>
+                </div>
+                <div [class.best-value]="ehMelhorOpcao(simulacao, 'juros')">
+                  <dt>Total de juros</dt>
+                  <dd>{{ formatarValor(simulacao.totalJuros) }}</dd>
+                  <span *ngIf="ehMelhorOpcao(simulacao, 'juros')">Menos juros</span>
+                </div>
+                <div [class.best-value]="ehMelhorOpcao(simulacao, 'total')">
+                  <dt>Custo total</dt>
+                  <dd>{{ formatarValor(simulacao.totalPago) }}</dd>
+                  <span *ngIf="ehMelhorOpcao(simulacao, 'total')">Menor total</span>
+                </div>
+              </dl>
+
+              <button type="button" mat-flat-button class="use-scenario-button" (click)="carregarSimulacao(simulacao)">
+                Usar este cenário
+              </button>
+            </article>
+          </div>
+
+          <p class="comparison-disclaimer">
+            <mat-icon aria-hidden="true">info</mat-icon>
+            Compare também o CET e as condições finais informadas pela instituição financeira.
+          </p>
+        </div>
+      </section>
     </div>
-  </section>
+
+    <footer class="history-footer">
+      <mat-icon aria-hidden="true">lock</mat-icon>
+      Seus dados continuam salvos apenas neste navegador.
+    </footer>
+  </aside>
 </div>
