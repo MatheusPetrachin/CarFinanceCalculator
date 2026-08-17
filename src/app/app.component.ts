@@ -7,7 +7,6 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatOptionModule } from '@angular/material/core';
 import { MatSelectModule } from '@angular/material/select';
-import { MatTableModule } from '@angular/material/table';
 import { Marca, ModeloAno, ResultadoFipe, SimulacaoHistorico, TaxaJuros } from './app.model';
 import { AppService } from './app.services';
 
@@ -35,8 +34,7 @@ interface ResultadoCalculo {
     MatIconModule,
     MatInputModule,
     MatOptionModule,
-    MatSelectModule,
-    MatTableModule
+    MatSelectModule
   ]
 })
 export class AppComponent implements OnInit {
@@ -76,18 +74,10 @@ export class AppComponent implements OnInit {
   valorFIPE = '';
 
   simulacoesHistorico: SimulacaoHistorico[] = [];
+  idsComparacao: string[] = [];
+  readonly maximoComparacoes = 3;
   mostrarHistorico = false;
   detalhesVeiculoAbertos = false;
-  colunasHistorico: string[] = [
-    'data',
-    'carro',
-    'valorTotal',
-    'parcelaTotal',
-    'numParcelas',
-    'taxaJuros',
-    'banco',
-    'acoes'
-  ];
 
   situacaoCarroControl = new FormControl('');
   combustivelControl = new FormControl('');
@@ -354,6 +344,12 @@ export class AppComponent implements OnInit {
 
   carregarHistorico(): void {
     this.simulacoesHistorico = this.appService.obterSimulacoes();
+    const idsDisponiveis = new Set(this.simulacoesHistorico.map(simulacao => simulacao.id));
+    this.idsComparacao = this.idsComparacao.filter(id => idsDisponiveis.has(id));
+
+    if (this.mostrarHistorico && this.idsComparacao.length === 0) {
+      this.inicializarComparacao();
+    }
   }
 
   salvarSimulacaoNoHistorico(): void {
@@ -464,6 +460,10 @@ export class AppComponent implements OnInit {
 
   alternarHistorico(): void {
     this.mostrarHistorico = !this.mostrarHistorico;
+
+    if (this.mostrarHistorico) {
+      this.inicializarComparacao();
+    }
   }
 
   fecharHistorico(): void {
@@ -474,6 +474,73 @@ export class AppComponent implements OnInit {
     if (event.target === event.currentTarget) {
       this.fecharHistorico();
     }
+  }
+
+  get simulacoesComparacao(): SimulacaoHistorico[] {
+    return this.idsComparacao
+      .map(id => this.simulacoesHistorico.find(simulacao => simulacao.id === id))
+      .filter((simulacao): simulacao is SimulacaoHistorico => Boolean(simulacao));
+  }
+
+  estaNaComparacao(id: string): boolean {
+    return this.idsComparacao.includes(id);
+  }
+
+  indiceComparacao(id: string): number {
+    return this.idsComparacao.indexOf(id) + 1;
+  }
+
+  alternarComparacao(id: string): void {
+    if (this.estaNaComparacao(id)) {
+      this.idsComparacao = this.idsComparacao.filter(item => item !== id);
+      return;
+    }
+
+    if (this.idsComparacao.length < this.maximoComparacoes) {
+      this.idsComparacao = [...this.idsComparacao, id];
+    }
+  }
+
+  removerDaComparacao(id: string): void {
+    this.idsComparacao = this.idsComparacao.filter(item => item !== id);
+  }
+
+  limparComparacao(): void {
+    this.idsComparacao = [];
+  }
+
+  obterMelhorSimulacao(metrica: 'parcela' | 'juros' | 'total'): SimulacaoHistorico | undefined {
+    return this.simulacoesComparacao.reduce<SimulacaoHistorico | undefined>((melhor, simulacao) => {
+      if (!melhor || this.obterValorMetrica(simulacao, metrica) < this.obterValorMetrica(melhor, metrica)) {
+        return simulacao;
+      }
+
+      return melhor;
+    }, undefined);
+  }
+
+  ehMelhorOpcao(simulacao: SimulacaoHistorico, metrica: 'parcela' | 'juros' | 'total'): boolean {
+    if (this.simulacoesComparacao.length < 2) {
+      return false;
+    }
+
+    const menorValor = Math.min(
+      ...this.simulacoesComparacao.map(item => this.obterValorMetrica(item, metrica))
+    );
+    return this.obterValorMetrica(simulacao, metrica) === menorValor;
+  }
+
+  formatarValor(value: number): string {
+    return this.formatarMoeda(value);
+  }
+
+  percentualEntrada(simulacao: SimulacaoHistorico): number {
+    const valorTotal = this.parseCurrency(simulacao.valorTotal);
+    if (valorTotal <= 0) {
+      return 0;
+    }
+
+    return Math.round((this.parseCurrency(simulacao.entrada) / valorTotal) * 100);
   }
 
   @HostListener('document:keydown.escape')
@@ -500,6 +567,31 @@ export class AppComponent implements OnInit {
     }
 
     return simulacao.valorFipe ? `Veículo — ${simulacao.valorFipe}` : 'Simulação sem veículo';
+  }
+
+  private inicializarComparacao(): void {
+    if (this.simulacoesHistorico.length === 0) {
+      return;
+    }
+
+    const quantidadeInicial = Math.min(2, this.simulacoesHistorico.length, this.maximoComparacoes);
+    const idsAdicionais = this.simulacoesHistorico
+      .map(simulacao => simulacao.id)
+      .filter(id => !this.idsComparacao.includes(id))
+      .slice(0, Math.max(0, quantidadeInicial - this.idsComparacao.length));
+
+    this.idsComparacao = [...this.idsComparacao, ...idsAdicionais];
+  }
+
+  private obterValorMetrica(
+    simulacao: SimulacaoHistorico,
+    metrica: 'parcela' | 'juros' | 'total'
+  ): number {
+    if (metrica === 'parcela') {
+      return this.parseCurrency(simulacao.parcelaTotal);
+    }
+
+    return metrica === 'juros' ? simulacao.totalJuros : simulacao.totalPago;
   }
 
   limparTela(): void {
